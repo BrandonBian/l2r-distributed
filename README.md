@@ -1,1 +1,2 @@
-# l2r-distributed
+# Learn-to-Race: Distributed RL with Optimizations
+## Kubernetes
