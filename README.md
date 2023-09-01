@@ -29,8 +29,8 @@ kubectl delete pod <pod-name> --force --grace-period=0
 # > Replace the KEY in the "<file-name>.yaml" files, like this
 python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
 
-# > Replace the PROJECT NAME in this line from "distrib_l2r/asynchron/learner.py", with your own project name (created on W&B)
-self.wandb_logger = WanDBLogger(api_key=api_key, project_name="test-project")
+# > Replace the project_name (currently 'l2r') in this line from "distrib_l2r/asynchron/learner.py", with your own project name (created on W&B)
+self.wandb_logger = WanDBLogger(api_key=api_key, project_name="l2r")
 ```
 
 ## Running sequential (non-distributed) L2R with ArrivalSim - within Phoebe Kubernetes pods
