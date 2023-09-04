@@ -33,10 +33,20 @@ spec:
           - name: CUDA_VISIBLE_DEVICES
             value: "0" 
         image: docker.pdl.cmu.edu/l2r2022:latest
-        command: # gonna have to make this smarter
+        command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
           - /bin/bash
           - -c
-          - apt-get update && apt-get install xvfb swig -y && pip3 install tianshou gym strictyaml line_profiler && git clone https://github.com/BrandonBian/l2r-distributed.git && cd "$(\ls -1dt ./*/ | head -n 1)" && pip3 install -r setup/devtools_reqs.txt && pip3 install wandb tensorboardX jsonpickle && pip3 install gym[box2d] protobuf==3.20.* && export AGENT_NAME=bipedal-walker && python3 worker.py
+          - export AGENT_NAME=walker &&
+              export TRAINING_PARADIGM=distribCollect &&
+              apt-get update &&
+              apt-get install xvfb swig -y &&
+              pip3 install tianshou gym strictyaml line_profiler &&
+              git clone https://github.com/BrandonBian/l2r-distributed.git &&
+              cd "$(\ls -1dt ./*/ | head -n 1)" &&
+              pip3 install -r setup/devtools_reqs.txt &&
+              pip3 install wandb tensorboardX jsonpickle &&
+              pip3 install gym[box2d] protobuf==3.20.* &&
+              python3 worker.py
 ---
 apiVersion: v1
 kind: Pod
@@ -56,10 +66,16 @@ spec:
         limits:
           nvidia.com/gpu: 1
       image: docker.pdl.cmu.edu/l2r2022:latest # Slightly different image or files or git repo
-      command: # gonna have to make this smarter
+      command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
         - /bin/bash
         - -c
-        - pip3 install tianshou gym strictyaml wandb line_profiler jsonpickle && git clone https://github.com/BrandonBian/l2r-distributed.git && cd "$(\ls -1dt ./*/ | head -n 1)" && pip3 install gym[box2d] protobuf==3.20.* && export AGENT_NAME=bipedal-walker && python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
+        - export AGENT_NAME=walker &&
+          export TRAINING_PARADIGM=distribCollect &&
+          pip3 install tianshou gym strictyaml wandb line_profiler &&
+          git clone https://github.com/BrandonBian/l2r-distributed.git &&
+          cd "$(\ls -1dt ./*/ | head -n 1)" &&
+          pip3 install gym[box2d] protobuf==3.20.* &&
+          python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
 
       ports:
       - name: learner-port
