@@ -96,12 +96,12 @@ class DistribUpdate_AsnycWorker:
         self.env = EnvContainer(self.encoder, self.env)
         """
 
-        if agent_name == "mountain-car":
+        if agent_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
                 "config_files/async_sac_mountaincar/distribUpdate_worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "bipedal-walker":
+        elif agent_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
                 "config_files/async_sac_bipedalwalker/distribUpdate_worker.yaml", NameToSourcePath.runner

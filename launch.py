@@ -4,7 +4,7 @@ import subprocess
 RL_agent = "mcar"
 
 # Define the training paradigm ('distribCollect', 'distribUpdate')
-training_paradigm = 'distribCollect'
+training_paradigm = 'distribUpdate'
 
 # Fetch the corresponding source file
 source_file = RL_agent + '-' + training_paradigm + '.yaml'
