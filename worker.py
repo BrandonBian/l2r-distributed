@@ -26,5 +26,8 @@ if __name__ == "__main__":
         learner_ip = socket.gethostbyname("mcar-learner-service")
         learner_address = (learner_ip, 4444)
         worker = AsnycWorker(learner_address=learner_address)
+    else:
+        print("Invalid Agent!")
+        exit(1)
 
     worker.work()

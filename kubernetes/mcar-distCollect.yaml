@@ -36,7 +36,9 @@ spec:
           command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
             - /bin/bash
             - -c
-            - apt-get update &&
+            - export AGENT_NAME=mcar &&
+              export TRAINING_PARADIGM=distCollect &&
+              apt-get update &&
               apt-get install xvfb swig -y &&
               pip3 install tianshou gym strictyaml line_profiler &&
               git clone https://github.com/BrandonBian/l2r-distributed.git &&
@@ -44,8 +46,6 @@ spec:
               pip3 install -r setup/devtools_reqs.txt &&
               pip3 install wandb tensorboardX jsonpickle &&
               pip3 install gym[box2d] protobuf==3.20.* &&
-              export AGENT_NAME=mcar &&
-              export TRAINING_PARADIGM=distCollect &&
               python3 worker.py
 ---
 apiVersion: v1
@@ -69,12 +69,12 @@ spec:
       command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
         - /bin/bash
         - -c
-        - pip3 install tianshou gym strictyaml wandb line_profiler &&
+        - export AGENT_NAME=mcar &&
+          export TRAINING_PARADIGM=distCollect &&
+          pip3 install tianshou gym strictyaml wandb line_profiler &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd "$(\ls -1dt ./*/ | head -n 1)" &&
           pip3 install gym[box2d] protobuf==3.20.* &&
-          export AGENT_NAME=mcar &&
-          export TRAINING_PARADIGM=distCollect &&
           python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
       ports:
         - name: learner-port

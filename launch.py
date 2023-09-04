@@ -14,7 +14,7 @@ print(f"--- Launching [{RL_agent}] with training paradigm [{training_paradigm}]:
 
 # Launch Kubernetes source file
 try:
-    subprocess.run(["kubectl", "apply", "-f", f"kubernetes/{source_file}"], check=True)
+    subprocess.run(["kubectl", "create", "-f", f"kubernetes/{source_file}"], check=True)
     print("Kubernetes resource applied successfully.")
 except subprocess.CalledProcessError as e:
     print(f"Error applying Kubernetes resource: {e}")
