@@ -1,7 +1,7 @@
 import subprocess
 
 # Define the RL agent ('mcar', 'walker', 'l2r')
-RL_agent = "mcar"
+RL_agent = "walker"
 
 # Define the training paradigm ('distribCollect', 'distribUpdate')
 training_paradigm = 'distribUpdate'
