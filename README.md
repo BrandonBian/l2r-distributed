@@ -1,5 +1,14 @@
 # Learn-to-Race: Distributed RL with Optimizations
 
+## Progress
+| RL Agent     | Training Paradigm      | YAML Source File        |   
+| ------------ | ---------------------- | ----------------------- | 
+| Mountain Car | Distributed Collection | `mcar-distCollect.yaml` | 
+| Mountain Car | Distributed Training   | `mcar-distTrain.yaml`   |    
+| Bipedal Walker | Distributed Collection | `walker-distCollect.yaml` |    
+| Bipedal Walker | Distributed Training   | `walker-distTrain.yaml`   |
+
+
 ## Basic Kubernetes control commands
 ```bash
 # Create pods

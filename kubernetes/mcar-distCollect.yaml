@@ -59,7 +59,7 @@ spec:
       command: # gonna have to make this smarter
         - /bin/bash
         - -c
-        - pip3 install tianshou gym strictyaml wandb line_profiler && git clone https://github.com/BrandonBian/l2r-distributed.git && cd "$(\ls -1dt ./*/ | head -n 1)" && pip3 install gym[box2d] protobuf==3.20.* && export AGENT_NAME=mountain-car && python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
+        - export AGENT_NAME=mcar && export TRAINING_PARADIGM=distCollect && pip3 install tianshou gym strictyaml wandb line_profiler && git clone https://github.com/BrandonBian/l2r-distributed.git && cd "$(\ls -1dt ./*/ | head -n 1)" && pip3 install gym[box2d] protobuf==3.20.* && python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
 
       ports:
       - name: learner-port
