@@ -11,12 +11,12 @@ import os
 if __name__ == "__main__":
 
     # Define the RL agent
-    agent_name = os.getenv("AGENT_NAME")
-    print(f"Worker Configured - {agent_name}")
+    agent_name = os.getenv("AGENT_NAME").strip()
+    print(f"Worker Configured - '{agent_name}'")
 
     # Define the training paradigm
-    training_paradigm = os.getenv("TRAINING_PARADIGM")
-    print(f"Training Paradigm Configured - {training_paradigm}")
+    training_paradigm = os.getenv("TRAINING_PARADIGM").strip()
+    print(f"Training Paradigm Configured - '{training_paradigm}'")
 
     if agent_name == "walker":
         learner_ip = socket.gethostbyname("walker-learner-service")
