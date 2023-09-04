@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     # Define the RL agent
     agent_name = os.getenv("AGENT_NAME")
-    print(f"Worker Initialized - {agent_name}")
+    print(f"Worker Configured - {agent_name}")
 
     # Define the training paradigm
     training_paradigm = os.getenv("TRAINING_PARADIGM")
@@ -28,5 +28,6 @@ if __name__ == "__main__":
         worker = AsnycWorker(learner_address=learner_address)
     else:
         print("Invalid Agent Name!")
+        exit(1)
 
     worker.work()
