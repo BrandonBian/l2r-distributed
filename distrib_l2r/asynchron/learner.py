@@ -151,16 +151,16 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
 
         # Create a replay buffer
         self.buffer_size = buffer_size
-        if agent_name == "mountain-car":
+        if agent_name == "mcar":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_mountaincar/buffer.yaml", NameToSourcePath.buffer
             )
-        elif agent_name == "bipedal-walker":
+        elif agent_name == "walker":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_bipedalwalker/buffer.yaml", NameToSourcePath.buffer
             )
         else:
-            print("Invalid Agent Name!")
+            print("Invalid Agent!")
             exit(1)
 
         # Inital policy to use

@@ -93,18 +93,18 @@ class AsnycWorker:
         self.env = EnvContainer(self.encoder, self.env) 
         """
 
-        if agent_name == "mountain-car":
+        if agent_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
                 "config_files/async_sac_mountaincar/worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "bipedal-walker":
+        elif agent_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
                 "config_files/async_sac_bipedalwalker/worker.yaml", NameToSourcePath.runner
             )
         else:
-            print("Invalid Agent Name!")
+            print("Invalid Agent!")
             exit(1)
 
         print("(worker.py) Action Space ==", self.env.action_space)
