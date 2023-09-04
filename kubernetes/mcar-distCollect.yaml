@@ -37,7 +37,7 @@ spec:
             - /bin/bash
             - -c
             - export AGENT_NAME=mcar &&
-              export TRAINING_PARADIGM=distCollect &&
+              export TRAINING_PARADIGM=distribCollect &&
               apt-get update &&
               apt-get install xvfb swig -y &&
               pip3 install tianshou gym strictyaml line_profiler &&
@@ -70,7 +70,7 @@ spec:
         - /bin/bash
         - -c
         - export AGENT_NAME=mcar &&
-          export TRAINING_PARADIGM=distCollect &&
+          export TRAINING_PARADIGM=distribCollect &&
           pip3 install tianshou gym strictyaml wandb line_profiler &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd "$(\ls -1dt ./*/ | head -n 1)" &&

@@ -1,11 +1,9 @@
 import socket
-from distrib_l2r.asynchron.distCollect.worker import DistCollect_AsnycWorker
-
-# from src.utils.envwrapper_aicrowd import EnvContainer
-# from tianshou.policy import SACPolicy
-# from tianshou.utils.net.common import Net
-# from tianshou.utils.net.continuous import ActorProb, Critic
 import os
+
+# Training Paradigm - Distributed Collection (DistribCollect)
+from distrib_l2r.asynchron.distribCollect.worker import DistribCollect_AsnycWorker
+# Training Paradigm - Distributed Update (DistribUpdate)
 
 if __name__ == "__main__":
 
@@ -20,11 +18,11 @@ if __name__ == "__main__":
     if agent_name == "walker":
         learner_ip = socket.gethostbyname("walker-learner-service")
         learner_address = (learner_ip, 4444)
-        worker = DistCollect_AsnycWorker(learner_address=learner_address)
+        worker = DistribCollect_AsnycWorker(learner_address=learner_address)
     elif agent_name == "mcar":
         learner_ip = socket.gethostbyname("mcar-learner-service")
         learner_address = (learner_ip, 4444)
-        worker = DistCollect_AsnycWorker(learner_address=learner_address)
+        worker = DistribCollect_AsnycWorker(learner_address=learner_address)
     else:
         print("Invalid Agent!")
         exit(1)
