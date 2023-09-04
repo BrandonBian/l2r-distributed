@@ -33,7 +33,7 @@ logging.getLogger('').setLevel(logging.INFO)
 agent_name = os.getenv("AGENT_NAME")
 
 
-class AsnycWorker:
+class DistCollect_AsnycWorker:
     """An asynchronous worker"""
 
     def __init__(

@@ -113,7 +113,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                   sock=self.request)
 
 
-class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
+class DistCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
     """A multi-threaded, offline, off-policy reinforcement learning server
 
     Args:

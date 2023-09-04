@@ -1,12 +1,14 @@
 # Learn-to-Race: Distributed RL with Optimizations
 
 ## Progress
-| RL Agent     | Training Paradigm      | YAML Source File        |   
-| ------------ | ---------------------- | ----------------------- | 
-| Mountain Car | Distributed Collection | `mcar-distCollect.yaml` | 
-| Mountain Car | Distributed Training   | `mcar-distTrain.yaml`   |    
-| Bipedal Walker | Distributed Collection | `walker-distCollect.yaml` |    
-| Bipedal Walker | Distributed Training   | `walker-distTrain.yaml`   |
+| RL Agent            | Training Paradigm      | YAML Source File          |
+| ------------------- | ---------------------- | ------------------------- |
+| Mountain Car        | Distributed Collection | `mcar-distCollect.yaml`   |
+| Mountain Car        | Distributed Training   | `mcar-distTrain.yaml`     |
+| Bipedal Walker      | Distributed Collection | `walker-distCollect.yaml` |
+| Bipedal Walker      | Distributed Training   | `walker-distTrain.yaml`   |
+| Learn-to-race Agent | Distributed Collection | `l2r-distCollect.yaml`    |
+| Learn-to-race Agent | Distributed Training   | `l2r-distTrain.yaml`      |
 
 
 ## Basic Kubernetes control commands
