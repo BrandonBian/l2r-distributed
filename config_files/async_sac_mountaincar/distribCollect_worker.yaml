@@ -1,4 +1,4 @@
-name: WorkerRunner
+name: DistribCollect_WorkerRunner
 config:
   agent_config_path: "config_files/async_sac_mountaincar/agent.yaml"
   buffer_config_path: "config_files/async_sac_mountaincar/buffer.yaml"

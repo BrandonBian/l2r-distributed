@@ -22,7 +22,9 @@ from tianshou.env import DummyVectorEnv
 from distrib_l2r.api import BufferMsg
 from distrib_l2r.api import EvalResultsMsg
 from distrib_l2r.api import InitMsg
+from distrib_l2r.api import ParameterMsg
 from distrib_l2r.utils import send_data
+from src.constants import Task
 
 logging.getLogger('').setLevel(logging.INFO)
 
@@ -33,7 +35,7 @@ logging.getLogger('').setLevel(logging.INFO)
 agent_name = os.getenv("AGENT_NAME")
 
 
-class DistribCollect_AsnycWorker:
+class DistribUpdate_AsnycWorker:
     """An asynchronous worker"""
 
     def __init__(
@@ -47,7 +49,7 @@ class DistribCollect_AsnycWorker:
         self.learner_address = learner_address
         self.buffer_size = buffer_size
         self.mean_reward = 0.0
-        """ 
+        """
         self.env = build_env(controller_kwargs={"quiet": True},
            env_kwargs=
                    {
@@ -89,75 +91,88 @@ class DistribCollect_AsnycWorker:
         )
         self.encoder.to(DEVICE)
 
-        self.env.action_space = gym.spaces.Box(np.array([-1, -1]), np.array([1.0, 1.0]))
-        self.env = EnvContainer(self.encoder, self.env) 
+        self.env.action_space = gym.spaces.Box(
+            np.array([-1, -1]), np.array([1.0, 1.0]))
+        self.env = EnvContainer(self.encoder, self.env)
         """
 
-        if agent_name == "mcar":
+        if agent_name == "mountain-car":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
-                "config_files/async_sac_mountaincar/distribCollect_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_mountaincar/distribUpdate_worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "walker":
+        elif agent_name == "bipedal-walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
-                "config_files/async_sac_bipedalwalker/distribCollect_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_bipedalwalker/distribUpdate_worker.yaml", NameToSourcePath.runner
             )
         else:
             raise NotImplementedError
 
-        print("(worker.py) Action Space ==", self.env.action_space)
-
     def work(self) -> None:
         """Continously collect data"""
-        counter = 0
-        is_train = True
-        logging.info("Sending init message to establish connection")
+        logging.info(f"Worker Sending: [Init Message]")
         response = send_data(
             data=InitMsg(), addr=self.learner_address, reply=True)
-        policy_id, policy = response.data["policy_id"], response.data["policy"]
-        logging.info("Finish init message, start true communication")
+
+        policy_id = response.data["policy_id"]
+        policy = response.data["policy"]
+        task = response.data["task"]
+        logging.info(
+            f"Worker: [{task}] | Param. Ver. = {policy_id}")
 
         while True:
-            buffer, result = self.collect_data(
-                policy_weights=policy, is_train=is_train)
-            self.mean_reward = self.mean_reward * \
-                (0.2) + result["reward"] * 0.8
+            """ Process request, collect data """
+            if task == Task.TRAIN:
+                parameters = self.train(
+                    policy_weights=policy, batches=response.data["replay_buffer"])
+            else:
+                buffer, result = self.process(
+                    policy_weights=policy, task=task)
 
-            if is_train:
+            """ Send response back to learner """
+            if task == Task.COLLECT:
+                """ Collect data, send back replay buffer (BufferMsg) """
                 response = send_data(
                     data=BufferMsg(data=buffer),
                     addr=self.learner_address,
                     reply=True
                 )
 
-                logging.info(f" --- Iteration {counter}: Training ---")
-                logging.info(f" >> reward: {self.mean_reward}")
-                logging.info(f" >> buffer size (sent): {len(buffer)}")
+                logging.info(
+                    f"Worker: [Task.COLLECT] | Param. Ver. = {policy_id} | Collected Buffer = {len(buffer)}")
 
-            else:
-
+            elif task == Task.EVAL:
+                """ Evaluate parameters, send back reward (EvalResultsMsg) """
                 response = send_data(
                     data=EvalResultsMsg(data=result),
                     addr=self.learner_address,
                     reply=True,
                 )
 
-                logging.info(f" --- Iteration {counter}: Inference ---")
-                logging.info(f" >> reward (sent): {self.mean_reward}")
-                logging.info(f" >> buffer size: {len(buffer)}")
+                reward = result["reward"]
+                logging.info(
+                    f"Worker: [Task.EVAL] | Param. Ver. = {policy_id} | Reward = {reward}")
 
-            is_train = response.data["is_train"]
-            policy_id, policy = response.data["policy_id"], response.data["policy"]
+            else:
+                """ Train parameters on the obtained replay buffers, send back updated parameters (ParameterMsg) """
+                response = send_data(
+                    data=ParameterMsg(data=parameters), addr=self.learner_address, reply=True)
+                
+                duration = parameters["duration"]
+                logging.info(
+                    f"Worker: [Task.TRAIN] | Param. Ver. = {policy_id} | Training time = {duration} s")
 
-            print("")
-            counter += 1
+            policy_id, policy, task = response.data["policy_id"], response.data["policy"], response.data["task"]
 
-    def collect_data(
-            self, policy_weights: dict, is_train: bool = True
+    def process(
+            self, policy_weights: dict, task: Task
     ) -> Tuple[ReplayBuffer, Any]:
-        """Collect 1 episode of data in the environment"""
-
-        buffer, result = self.runner.run(self.env, policy_weights, is_train)
-
+        """ Collect 1 episode of data (replay buffer OR reward) in the environment """
+        buffer, result = self.runner.run(self.env, policy_weights, task)
         return buffer, result
+
+    def train(self, policy_weights: dict, batches: list):
+        """ Perform update of the received parameters based on all the received batches """
+        parameters = self.runner.train(policy_weights, batches)
+        return parameters

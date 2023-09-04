@@ -8,6 +8,7 @@ from typing import Callable
 from typing import Dict
 from typing import Optional
 from typing import Tuple
+from copy import deepcopy
 import time
 from tqdm import tqdm
 import sys
@@ -21,8 +22,10 @@ from distrib_l2r.api import BufferMsg
 from distrib_l2r.api import InitMsg
 from distrib_l2r.api import EvalResultsMsg
 from distrib_l2r.api import PolicyMsg
+from distrib_l2r.api import ParameterMsg
 from distrib_l2r.utils import receive_data
 from distrib_l2r.utils import send_data
+from src.constants import Task
 
 logging.getLogger('').setLevel(logging.INFO)
 agent_name = os.getenv("AGENT_NAME")
@@ -33,6 +36,10 @@ agent_name = os.getenv("AGENT_NAME")
 # The server applies all the changes - iterate through all the received gradients (quality or quantity matters)
 
 # Sequential: collect + train, sending parameters instead of gradients, server average the parameters
+
+TIMING = False
+SEND_BATCH = 30
+
 
 class ThreadPoolMixIn(socketserver.ThreadingMixIn):
     '''
@@ -89,19 +96,48 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # Received a replay buffer from a worker
         # Add this to buff
         if isinstance(msg, BufferMsg):
+            logging.info(
+                f"<<< Learner Receiving: [Replay Buffer] | Buffer Size = {len(msg.data)}")
             self.server.buffer_queue.put(msg.data)
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
         elif isinstance(msg, InitMsg):
-            logging.info("Received init message")
+            logging.info(f"<<< Learner Receiving: [Init Message]")
 
         # Received evaluation results from a worker
+        # Log to Weights and Biases
         elif isinstance(msg, EvalResultsMsg):
-            print("Received:", msg.data)
+            reward = msg.data["reward"]
+            logging.info(
+                f"<<< Learner Receiving: [Reward] | Reward = {reward}")
             self.server.wandb_logger.log_metric(
-                msg.data["reward"], 'reward'
+                reward, 'reward'
             )
+
+        # Received trained parameters from a worker
+        # Update current parameter with damping factors - TODO
+        elif isinstance(msg, ParameterMsg):
+            new_parameters = msg.data["parameters"]
+            current_parameters = {k: v.cpu()
+                                  for k, v in self.server.agent.state_dict().items()}
+
+            assert set(current_parameters.keys()) == set(
+                new_parameters.keys()), "Parameters from worker not matching learner's!"
+
+            # Loop through the keys of the dictionaries and update the values of old_dict using the damping formula
+            alpha = 0.8
+            for key in current_parameters:
+                old_value = current_parameters[key]
+                new_value = new_parameters[key]
+                updated_value = alpha * old_value + (1 - alpha) * new_value
+                current_parameters[key] = updated_value
+
+            logging.info(
+                f"<<< Learner Receiving: [Trained Parameters] | Updating parameters")
+            
+            self.server.agent.load_model(current_parameters)
+            self.server.update_agent()
 
         # unexpected
         else:
@@ -113,7 +149,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                   sock=self.request)
 
 
-class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
+class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
     """A multi-threaded, offline, off-policy reinforcement learning server
 
     Args:
@@ -136,7 +172,6 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             epochs: int = 500,  # Originally 500
             buffer_size: int = 1_000_000,  # Originally 1M
             server_address: Tuple[str, int] = ("0.0.0.0", 4444),
-            eval_prob: float = 0.20,
             save_func: Optional[Callable] = None,
             save_freq: Optional[int] = None,
             api_key: str = "",
@@ -147,22 +182,21 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.update_steps = update_steps
         self.batch_size = batch_size
         self.epochs = epochs
-        self.eval_prob = eval_prob
 
         # Create a replay buffer
         self.buffer_size = buffer_size
-        if agent_name == "mcar":
+        if agent_name == "mountain-car":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_mountaincar/buffer.yaml", NameToSourcePath.buffer
             )
-        elif agent_name == "walker":
+        elif agent_name == "bipedal-walker":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_bipedalwalker/buffer.yaml", NameToSourcePath.buffer
             )
         else:
             raise NotImplementedError
 
-        # Inital policy to use
+        # Initial policy to use
         self.agent = agent
         self.agent_id = 1
 
@@ -179,10 +213,9 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.buffer_queue = queue.LifoQueue(300)
 
         self.wandb_logger = WanDBLogger(
-            api_key=api_key, project_name="l2r")
+            api_key=api_key, project_name="test-project")
         # Save function, called optionally
         self.save_func = save_func
-        self.save_freq = save_freq
 
     def get_agent_dict(self) -> Dict[str, Any]:
         """Get the most up-to-date version of the policy without blocking"""
@@ -193,11 +226,36 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 # non-blocking
                 pass
 
-        return {
-            "policy_id": self.agent_id,
-            "policy": self.updated_agent,
-            "is_train": random.random() >= self.eval_prob,
-        }
+        start = time.time()
+        task = self.select_task()
+
+        if task == Task.TRAIN:
+            buffers_to_send = []
+
+            for _ in range(SEND_BATCH):
+                batch = self.replay_buffer.sample_batch()
+                buffers_to_send.append(batch)
+
+            msg = {
+                "policy_id": self.agent_id,
+                "policy": self.updated_agent,
+                "replay_buffer": buffers_to_send,
+                "task": task
+            }
+        else:
+            msg = {
+                "policy_id": self.agent_id,
+                "policy": self.updated_agent,
+                "task": task
+            }
+
+        duration = time.time() - start
+        if TIMING:
+            print(f"Preparation Time = {duration} s")
+
+        logging.info(
+            f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
+        return msg
 
     def update_agent(self) -> None:
         """Update policy that will be sent to workers without blocking"""
@@ -209,43 +267,57 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 pass
         self.agent_queue.put({k: v.cpu()
                              for k, v in self.agent.state_dict().items()})
+
         self.agent_id += 1
 
     def learn(self) -> None:
         """The thread where thread-safe gradient updates occur"""
-        epoch = 0
         while True:
+            # Sample data from buffer_queue, and put inside replay buffer
             if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                 semibuffer = self.buffer_queue.get()
 
-                logging.info(f" --- Epoch {epoch} ---")
-                logging.info(f" Samples received = {len(semibuffer)}")
                 logging.info(
-                    f" Replay buffer size = {len(self.replay_buffer)}")
-                logging.info(
-                    f" Buffers to be processed = {self.buffer_queue.qsize()}")
+                    f"--- Learner Processing: Sampled Buffer = {len(semibuffer)} | Replay Buffer = {len(self.replay_buffer)} | Buffer Queue = {self.buffer_queue.qsize()}")
 
                 # Add new data to the primary replay buffer
                 self.replay_buffer.store(semibuffer)
+            
+            time.sleep(0.5)
 
-            # Learning steps for the policy
-            for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
-                batch = self.replay_buffer.sample_batch()
-                self.agent.update(data=batch)
-                # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
+        # epoch = 0
+        # while True:
 
-            # Update policy without blocking
-            self.update_agent()
+
+            # start = time.time()
+            # # Learning steps for the policy
+            # for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
+            #     batch = self.replay_buffer.sample_batch()
+            #     self.agent.update(data=batch)
+
+            # # Update policy without blocking
+            # self.update_agent()
+            # duration = time.time() - start
+            # if TIMING:
+            #     print(f"Update time = {duration}")
 
             # Optionally save
-            if self.save_func and epoch % self.save_every == 0:
-                self.save_fn(epoch=epoch, policy=self.get_policy_dict())
+            # if self.save_func and epoch % self.save_every == 0:
+            #     self.save_fn(epoch=epoch, policy=self.get_policy_dict())
 
-            epoch += 1
-            print("")
+            # epoch += 1
 
     def server_bind(self):
         # From https://stackoverflow.com/questions/6380057/python-binding-socket-address-already-in-use/18858817#18858817.
         # Tries to ensure reuse. Might be wrong.
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(self.server_address)
+
+    def select_task(self):
+        if len(self.replay_buffer) < 2048:
+            # If replay buffer is empty, we need to collect more data
+            return Task.COLLECT
+        else:
+            weights = [0.5, 0.1, 0.4]
+            return random.choices([Task.TRAIN, Task.EVAL, Task.COLLECT], weights=weights)[0]
+    

@@ -1,2 +1,2 @@
 from .ModelFreeRunner import ModelFreeRunner
-from .WorkerRunner import WorkerRunner
+from .WorkerRunner import DistribCollect_WorkerRunner, DistribUpdate_WorkerRunner
