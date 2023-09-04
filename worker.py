@@ -16,21 +16,22 @@ if __name__ == "__main__":
     training_paradigm = os.getenv("TRAINING_PARADIGM").strip()
     print(f"Training Paradigm Configured - '{training_paradigm}'")
 
+    # Configure learner IP (by agent)
     if agent_name == "walker":
         learner_ip = socket.gethostbyname("walker-learner-service")
         learner_address = (learner_ip, 4444)
 
-        worker = DistribCollect_AsnycWorker(learner_address=learner_address)
     elif agent_name == "mcar":
         learner_ip = socket.gethostbyname("mcar-learner-service")
         learner_address = (learner_ip, 4444)
-
-        if training_paradigm == "distribCollect":
-            worker = DistribCollect_AsnycWorker(learner_address=learner_address)
-        elif training_paradigm == "distribUpdate":
-            worker = DistribUpdate_AsnycWorker(learner_address=learner_address)
-        else:
-            raise NotImplementedError
+    else:
+        raise NotImplementedError
+    
+    # Configure worker (by training paradigm)
+    if training_paradigm == "distribCollect":
+        worker = DistribCollect_AsnycWorker(learner_address=learner_address)
+    elif training_paradigm == "distribUpdate":
+        worker = DistribUpdate_AsnycWorker(learner_address=learner_address)
     else:
         raise NotImplementedError
 
