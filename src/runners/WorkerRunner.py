@@ -4,6 +4,7 @@ from src.config.yamlize import create_configurable, NameToSourcePath, yamlize
 from src.constants import DEVICE, Task
 
 from torch.optim import Adam
+from copy import deepcopy
 import torch
 
 
@@ -77,7 +78,7 @@ class DistribCollect_WorkerRunner(BaseRunner):
                 self.replay_buffer.finish_path(action_obj)
 
             state_encoded = next_state_encoded
-        from copy import deepcopy
+        
         info = {'metrics': {}}
         info["metrics"]["reward"] = ep_ret
         return deepcopy(self.replay_buffer), info["metrics"]
