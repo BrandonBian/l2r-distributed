@@ -213,7 +213,7 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.buffer_queue = queue.LifoQueue(300)
 
         self.wandb_logger = WanDBLogger(
-            api_key=api_key, project_name="test-project")
+            api_key=api_key, project_name="l2r")
         # Save function, called optionally
         self.save_func = save_func
 
