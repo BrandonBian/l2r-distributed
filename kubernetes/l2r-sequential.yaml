@@ -35,11 +35,26 @@ spec:
               value: "2" # 0-7??
             - name: CUDA_VISIBLE_DEVICES
               value: "0" # has to match the above
-          image: docker.pdl.cmu.edu/l2r2022:latest
+          image: docker.pdl.cmu.edu/jingyua4/safepo:v1
           command:
             - /bin/bash
             - -c
-            - apt-get update && git clone https://github.com/BrandonBian/l2r-distributed.git && cd l2r-distributed && git checkout l2r-sequential && pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment && pip install -r setup/devtools_reqs.txt && pip install "opencv-python-headless<4.3" protobuf==3.20.* && sleep infinity
+            - cd / &&
+              sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC &&
+              sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC &&
+              sudo apt-get update &&
+              sudo apt-get install -y python3.8 python3.8-dev python3.8-distutils python3.8-venv &&
+              wget https://bootstrap.pypa.io/get-pip.py &&
+              sudo python3.8 get-pip.py &&
+              apt install -y git &&
+              git clone https://github.com/BrandonBian/l2r-distributed.git &&
+              cd l2r-distributed &&
+              git checkout l2r-sequential &&
+              pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment &&
+              pip install -r setup/devtools_reqs.txt &&
+              pip install "opencv-python-headless<4.3" protobuf==3.20.* &&
+              cd /home/LinuxNoEditor/ &&
+              sudo -u ubuntu ./ArrivalSim.sh -OpenGL
 
 ---
 apiVersion: v1
