@@ -51,14 +51,14 @@ spec:
               git checkout sequential &&
               pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment &&
               pip install -r setup/devtools_reqs.txt &&
-              pip install "opencv-python-headless<4.3" protobuf==3.20.* &&
+              pip install "opencv-python-headless<4.3" gym[box2d] protobuf==3.20.* &&
               cd /home/LinuxNoEditor/ &&
               sudo -u ubuntu ./ArrivalSim.sh -OpenGL
 
-# Notes: after creating the pod, the Arrivial Simulator will be launched, and for L2R agents, you need to manually enter the pod
-#        and run the following commands to start the python script:
-#        - cd /l2r-distributed
-#        - python3.8 -m scripts.main
+# [Notes]: After creating the pod, the Arrivial Simulator will be launched, and for L2R agents, you need to manually enter the pod
+#          and run the following commands to start the python script:
+#          > cd /l2r-distributed
+#          > python3.8 -m scripts.main --env l2r --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
 ---
 apiVersion: v1
 kind: Service
