@@ -2,7 +2,7 @@ name: ModelFreeRunner
 config:
   agent_config_path: "config_files/l2r_sac/agent.yaml"
   buffer_config_path: "config_files/l2r_sac/buffer.yaml"
-  env_config_path: "config_files/mcar_sac/env.yaml"
+  env_config_path: "config_files/l2r_sac/env.yaml"
   model_save_dir: '/mnt'
   experiment_state_path: '/mnt/SAC_VAE/experimentState.json'
   experiment_name: 'SAC_VAE'
@@ -13,4 +13,3 @@ config:
   update_model_every: 100 # update_every
   eval_every: 5000
   max_episode_length: 50000 # max_ep_len
-  use_container: True
