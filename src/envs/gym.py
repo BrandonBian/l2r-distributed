@@ -4,7 +4,6 @@ import torch
 import itertools
 from src.constants import DEVICE
 from src.config.yamlize import create_configurable, yamlize, NameToSourcePath
-from typing import Optional
 import gym
 
 @yamlize

@@ -4,14 +4,13 @@ import torch
 import itertools
 from src.constants import DEVICE
 from src.config.yamlize import create_configurable, yamlize, NameToSourcePath
-from typing import Optional
 from l2r import build_env
 
 @yamlize
 class L2RSingleCamera:
     """Container for the pip-installed L2R Environment."""
 
-    def __init__(self, encoder : Optional[str]):
+    def __init__(self, encoder : str):
         """Initialize env around encoder [TODO: Make configurations as params to this class.]
 
         Args:
