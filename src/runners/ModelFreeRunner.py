@@ -28,7 +28,7 @@ class ModelFreeRunner(BaseRunner):
         self,
         agent_config_path: str,
         buffer_config_path: str,
-        encoder_config_path: str,
+        env_config_path: str,
         model_save_dir: str,
         experiment_name: str,
         experiment_state_path: str,
@@ -40,14 +40,13 @@ class ModelFreeRunner(BaseRunner):
         eval_every: int,
         max_episode_length: int,
         resume_training: bool = False,
-        use_container: bool = True,
     ):
         """Initialize ModelFreeRunner.
 
         Args:
             agent_config_path (str): Path to agent configuration YAML.
             buffer_config_path (str): Path to replay buffer configuration YAML.
-            encoder_config_path (str): Path to encoder configuration YAML.
+            env_config_path (str): Path to the environment configuration YAML.
             model_save_dir (str): Path to save model
             experiment_name (str): Experiment name in WandB
             experiment_state_path (str): Path to save experiment state for resuming.
@@ -58,7 +57,6 @@ class ModelFreeRunner(BaseRunner):
             update_model_every (int): Update model every __ training steps, for ___ training steps.
             eval_every (int): Evaluate every ___ episodes.
             max_episode_length (int): Maximum episode length ( BAD PARAM / BUGGY. )
-            use_container (bool, optional): Whether to use the provided wrapper (HIGHLY ENCOURAGED). Defaults to True.
         """
         super().__init__()
         # Moved initialzation of env to run to allow for yamlization of this class.
@@ -92,11 +90,6 @@ class ModelFreeRunner(BaseRunner):
         self.file_logger = FileLogger(self.model_save_dir, self.experiment_name)
         self.file_logger.log_obj.info("Using random seed: {}".format(0))
 
-        ## ENCODER Declaration
-        self.encoder = create_configurable(
-            encoder_config_path, NameToSourcePath.encoder
-        )
-        self.encoder.to(DEVICE)
 
         ## BUFFER Declaration
         if not self.resume_training:
@@ -118,10 +111,7 @@ class ModelFreeRunner(BaseRunner):
             self.replay_buffer = running_vars["buffer"]
             self.best_eval_ret = running_vars["current_best_eval_ret"]
 
-        if use_container:
-            self.env_wrapped = EnvContainer(self.encoder)
-        else:
-            self.env_wrapped = None
+        self.env_wrapped = create_configurable(env_config_path, NameToSourcePath.environment)
 
         ## WANDB Declaration
         """self.wandb_logger = None
@@ -130,7 +120,7 @@ class ModelFreeRunner(BaseRunner):
                 api_key=self.api_key, project_name="test-project"
             )"""
 
-    def run(self, env, api_key: str = "173e38ab5f2f2d96c260f57c989b4d068b64fb8a"):
+    def run(self, api_key: str = "173e38ab5f2f2d96c260f57c989b4d068b64fb8a"):
         """Train an agent, with our given parameters, on the environment in question.
 
         Args:
@@ -147,11 +137,9 @@ class ModelFreeRunner(BaseRunner):
         for ep_number in range(start_idx + 1, self.num_run_episodes + 1):
 
             done = False
-            if self.env_wrapped:
-                obs_encoded = self.env_wrapped.reset(True, env)
-            else:
-                obs_encoded = env.reset()
 
+            obs_encoded = self.env_wrapped.reset(options={"random_pos":True})
+            
             ep_ret = 0
             total_reward = 0
             info = None
@@ -159,12 +147,10 @@ class ModelFreeRunner(BaseRunner):
                 t += 1
                 self.agent.deterministic = False
                 action_obj = self.agent.select_action(obs_encoded)
-                if self.env_wrapped:
-                    obs_encoded_new, reward, done, info = self.env_wrapped.step(
+                obs_encoded_new, reward, done, info = self.env_wrapped.step(
                         action_obj.action
                     )
-                else:
-                    obs_encoded_new, reward, done, info = env.step(action_obj.action)
+
 
                 ep_ret += reward
                 # self.file_logger.log(f"reward: {reward}")
@@ -242,10 +228,8 @@ class ModelFreeRunner(BaseRunner):
 
         for j in range(self.num_test_episodes):
 
-            if self.env_wrapped:
-                eval_obs_encoded = self.env_wrapped.reset()
-            else:
-                eval_obs_encoded = env.reset()
+            obs_encoded = self.env_wrapped.reset(options={"random_pos":False})
+            
 
             eval_done, eval_ep_ret, eval_ep_len, eval_n_val_steps, self.metadata = (
                 False,
@@ -262,17 +246,12 @@ class ModelFreeRunner(BaseRunner):
                 self.t = 1e6
                 eval_action_obj = self.agent.select_action(eval_obs_encoded)
                 eval_action_obj = self.agent.select_action(eval_obs_encoded)
-                if self.env_wrapped:
-                    (
-                        eval_obs_encoded_new,
-                        eval_reward,
-                        eval_done,
-                        eval_info,
-                    ) = self.env_wrapped.step(eval_action_obj.action)
-                else:
-                    eval_obs_encoded_new, eval_reward, eval_done, eval_info = env.step(
-                        eval_action_obj.action, encode=True
-                    )
+                (
+                    eval_obs_encoded_new,
+                    eval_reward,
+                    eval_done,
+                    eval_info,
+                ) = self.env_wrapped.step(eval_action_obj.action)
 
                 # Check that the camera is turned on
                 eval_ep_ret += eval_reward
