@@ -6,17 +6,19 @@ from src.constants import DEVICE
 from src.config.yamlize import create_configurable, yamlize, NameToSourcePath
 from l2r import build_env
 
+
 @yamlize
 class L2RSingleCamera:
     """Container for the pip-installed L2R Environment."""
 
-    def __init__(self, encoder_config_path : str):
+    def __init__(self, encoder_config_path: str):
         """Initialize env around encoder [TODO: Make configurations as params to this class.]
 
         Args:
             encoder (nn.Module, optional): Encoder object to encoder inputs. Defaults to None.
         """
-        self.encoder = create_configurable(encoder_config_path, NameToSourcePath.encoder)
+        self.encoder = create_configurable(
+            encoder_config_path, NameToSourcePath.encoder)
         self.encoder.to(DEVICE)
 
         self.env = build_env(
@@ -83,7 +85,7 @@ class L2RSingleCamera:
         obs, reward, done, info = self.env.step(action)
         return self._process_obs(obs), reward, done, info
 
-    def reset(self, options = None):
+    def reset(self, options=None):
         """Reset env.
 
         Args:
@@ -92,5 +94,6 @@ class L2RSingleCamera:
         Returns:
             next_obs: Encoded next observation.
         """
-        obs = self.env.reset(random_pos=False if options is None else options.get("random_pos",False))
+        obs = self.env.reset(
+            random_pos=False if options is None else options.get("random_pos", False))
         return self._process_obs(obs)

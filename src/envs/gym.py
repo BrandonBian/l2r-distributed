@@ -22,8 +22,8 @@ class GymEnv:
     def step(self, action):
         return self.env.step(action)
 
-    def reset(self, action, options=None):
-        return self.env.reset(action)
+    def reset(self, options=None):
+        return self.env.reset()
 
     def __getattr__(self, name):
         try:
