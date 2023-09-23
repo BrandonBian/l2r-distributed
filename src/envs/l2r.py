@@ -16,7 +16,7 @@ class L2RSingleCamera:
         Args:
             encoder (nn.Module, optional): Encoder object to encoder inputs. Defaults to None.
         """
-        self.encoder = create_configurable(encoder_config_path, NameToSourcePath.environment)
+        self.encoder = create_configurable(encoder_config_path, NameToSourcePath.encoder)
         self.encoder.to(DEVICE)
 
         self.env = build_env(
