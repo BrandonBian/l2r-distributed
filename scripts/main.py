@@ -16,7 +16,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--wandb_apikey",
         type=str,
-        help="Select the environment ('l2r', 'mcar', or 'walker')."
+        help="Enter your Weights-And-Bias API Key."
     )
 
     args = parser.parse_args()
@@ -27,6 +27,9 @@ if __name__ == "__main__":
     if args.env == "l2r":
         runner = create_configurable(
             "config_files/l2r_sac/runner.yaml", NameToSourcePath.runner)
+    elif args.env == "mcar":
+        runner = create_configurable(
+            "config_files/mcar_sac/runner.yaml", NameToSourcePath.runner)
 
     torch.autograd.set_detect_anomaly(True)
     runner.run(args.wandb_apikey)
