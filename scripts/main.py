@@ -1,10 +1,32 @@
 from src.config.yamlize import NameToSourcePath, create_configurable
 import torch
+import argparse
 
 if __name__ == "__main__":
-    runner = create_configurable(
-        "config_files/l2r_sac/runner.yaml", NameToSourcePath.runner)
-    
+
+    # Argparse for environment selection and wandb config
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--env",
+        choices=["l2r", "mcar", "walker"],
+        help="Select the environment ('l2r', 'mcar', or 'walker')."
+    )
+
+    parser.add_argument(
+        "--wandb_apikey",
+        type=str,
+        help="Select the environment ('l2r', 'mcar', or 'walker')."
+    )
+
+    args = parser.parse_args()
+
+    # Initialize the runner and start run
+    print(f"Environment: {args.env}")
+
+    if args.env == "l2r":
+        runner = create_configurable(
+            "config_files/l2r_sac/runner.yaml", NameToSourcePath.runner)
+
     torch.autograd.set_detect_anomaly(True)
-    
-    runner.run("173e38ab5f2f2d96c260f57c989b4d068b64fb8a")
+    runner.run(args.wandb_apikey)

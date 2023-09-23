@@ -80,18 +80,19 @@ class ModelFreeRunner(BaseRunner):
                 "Folder or incorrect file type specified. Expected json filename."
             )
 
-        ## AGENT Declaration
-        self.agent = create_configurable(agent_config_path, NameToSourcePath.agent)
+        # AGENT Declaration
+        self.agent = create_configurable(
+            agent_config_path, NameToSourcePath.agent)
 
-        ## LOGGER Declaration
+        # LOGGER Declaration
         self.tb_logger_obj = TensorboardLogger(
             self.model_save_dir, self.experiment_name
         )
-        self.file_logger = FileLogger(self.model_save_dir, self.experiment_name)
+        self.file_logger = FileLogger(
+            self.model_save_dir, self.experiment_name)
         self.file_logger.log_obj.info("Using random seed: {}".format(0))
 
-
-        ## BUFFER Declaration
+        # BUFFER Declaration
         if not self.resume_training:
             self.replay_buffer = create_configurable(
                 buffer_config_path, NameToSourcePath.buffer
@@ -104,23 +105,25 @@ class ModelFreeRunner(BaseRunner):
             with open(self.experiment_state_path, "r") as openfile:
                 json_object = openfile.readline()
             running_vars = jsonpickle.decode(json_object)
-            self.file_logger.log(f"running_vars: {running_vars}, {type(running_vars)}")
+            self.file_logger.log(
+                f"running_vars: {running_vars}, {type(running_vars)}")
             # self.replay_buffer = old_runner_obj.replay_buffer
             self.best_ret = running_vars["current_best_ret"]
             self.last_saved_episode = running_vars["last_saved_episode"]
             self.replay_buffer = running_vars["buffer"]
             self.best_eval_ret = running_vars["current_best_eval_ret"]
 
-        self.env_wrapped = create_configurable(env_config_path, NameToSourcePath.environment)
+        self.env_wrapped = create_configurable(
+            env_config_path, NameToSourcePath.environment)
 
-        ## WANDB Declaration
+        # WANDB Declaration
         """self.wandb_logger = None
         if self.api_key:
             self.wandb_logger = WanDBLogger(
                 api_key=self.api_key, project_name="test-project"
             )"""
 
-    def run(self, api_key: str = "173e38ab5f2f2d96c260f57c989b4d068b64fb8a"):
+    def run(self, api_key: str):
         """Train an agent, with our given parameters, on the environment in question.
 
         Args:
@@ -138,8 +141,8 @@ class ModelFreeRunner(BaseRunner):
 
             done = False
 
-            obs_encoded = self.env_wrapped.reset(options={"random_pos":True})
-            
+            obs_encoded = self.env_wrapped.reset(options={"random_pos": True})
+
             ep_ret = 0
             total_reward = 0
             info = None
@@ -148,9 +151,8 @@ class ModelFreeRunner(BaseRunner):
                 self.agent.deterministic = False
                 action_obj = self.agent.select_action(obs_encoded)
                 obs_encoded_new, reward, done, info = self.env_wrapped.step(
-                        action_obj.action
-                    )
-
+                    action_obj.action
+                )
 
                 ep_ret += reward
                 # self.file_logger.log(f"reward: {reward}")
@@ -175,7 +177,8 @@ class ModelFreeRunner(BaseRunner):
                         self.agent.update(data=batch)
 
             if ep_number % self.eval_every == 0:
-                self.file_logger.log(f"Episode Number before eval: {ep_number}")
+                self.file_logger.log(
+                    f"Episode Number before eval: {ep_number}")
                 eval_ret = self.eval(env)
                 self.file_logger.log(f"Episode Number after eval: {ep_number}")
                 if eval_ret > self.best_eval_ret:
@@ -204,7 +207,8 @@ class ModelFreeRunner(BaseRunner):
                     }
                 )
 
-            self.file_logger.log(f"Episode Number after WanDB call: {ep_number}")
+            self.file_logger.log(
+                f"Episode Number after WanDB call: {ep_number}")
             self.file_logger.log(f"info: {info}")
             self.file_logger.log(
                 f"Episode {ep_number}: Current return: {ep_ret}, Previous best return: {self.best_ret}"
@@ -228,8 +232,7 @@ class ModelFreeRunner(BaseRunner):
 
         for j in range(self.num_test_episodes):
 
-            obs_encoded = self.env_wrapped.reset(options={"random_pos":False})
-            
+            obs_encoded = self.env_wrapped.reset(options={"random_pos": False})
 
             eval_done, eval_ep_ret, eval_ep_len, eval_n_val_steps, self.metadata = (
                 False,
