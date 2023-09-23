@@ -6,11 +6,12 @@ from src.constants import DEVICE
 from src.config.yamlize import create_configurable, yamlize, NameToSourcePath
 import gym
 
+
 @yamlize
 class GymEnv:
     """Container for initializing Gym envs."""
 
-    def __init__(self, env_name : str):
+    def __init__(self, env_name: str):
         """Initialize env 
 
         Args:
@@ -18,12 +19,10 @@ class GymEnv:
         """
         self.env = gym.make(env_name)
 
-    def step(self,action):
-
+    def step(self, action):
         return self.env.step(action)
-    
-    def reset(self,action):
 
+    def reset(self, action, options=None):
         return self.env.reset(action)
 
     def __getattr__(self, name):
