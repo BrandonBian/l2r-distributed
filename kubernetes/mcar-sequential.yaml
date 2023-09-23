@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: l2r-sequential
+  name: mcar-sequential
   labels:
     tier: worker-set
 spec:
@@ -60,7 +60,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: l2r-sequential-service
+  name: mcar-sequential-service
 spec:
   selector:
     app.kubernetes.io/name: proxy
