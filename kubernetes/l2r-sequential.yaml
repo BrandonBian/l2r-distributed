@@ -40,8 +40,7 @@ spec:
             - /bin/bash
             - -c
             - cd / &&
-              sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC &&
-              sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC &&
+              sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys A4B469963BF863CC &&
               sudo apt-get update &&
               sudo apt-get install -y python3.8 python3.8-dev python3.8-distutils python3.8-venv &&
               wget https://bootstrap.pypa.io/get-pip.py &&
@@ -49,7 +48,7 @@ spec:
               apt install -y git &&
               git clone https://github.com/BrandonBian/l2r-distributed.git &&
               cd l2r-distributed &&
-              git checkout l2r-sequential &&
+              git checkout sequential &&
               pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment &&
               pip install -r setup/devtools_reqs.txt &&
               pip install "opencv-python-headless<4.3" protobuf==3.20.* &&
@@ -58,9 +57,8 @@ spec:
 
 # Notes: after creating the pod, the Arrivial Simulator will be launched, and for L2R agents, you need to manually enter the pod
 #        and run the following commands to start the python script:
-#        - export AGENT_NAME=l2r
 #        - cd /l2r-distributed
-#        - python3 -m scripts.main
+#        - python3.8 -m scripts.main
 ---
 apiVersion: v1
 kind: Service
