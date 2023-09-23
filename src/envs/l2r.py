@@ -10,13 +10,13 @@ from l2r import build_env
 class L2RSingleCamera:
     """Container for the pip-installed L2R Environment."""
 
-    def __init__(self, encoder : str):
+    def __init__(self, encoder_config_path : str):
         """Initialize env around encoder [TODO: Make configurations as params to this class.]
 
         Args:
             encoder (nn.Module, optional): Encoder object to encoder inputs. Defaults to None.
         """
-        self.encoder = create_configurable(encoder, NameToSourcePath.environment)
+        self.encoder = create_configurable(encoder_config_path, NameToSourcePath.environment)
         self.encoder.to(DEVICE)
 
         self.env = build_env(
