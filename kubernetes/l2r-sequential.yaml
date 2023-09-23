@@ -58,6 +58,7 @@ spec:
 
 # Notes: after creating the pod, the Arrivial Simulator will be launched, and for L2R agents, you need to manually enter the pod
 #        and run the following commands to start the python script:
+#        - export AGENT=l2r
 #        - cd /l2r-distributed
 #        - python3 -m scripts.main
 ---
