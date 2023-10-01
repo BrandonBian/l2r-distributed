@@ -249,7 +249,7 @@ class ModelFreeRunner(BaseRunner):
 
         for j in range(self.num_test_episodes):
 
-            obs_encoded = self.env_wrapped.reset(options={"random_pos": False})
+            eval_obs_encoded = self.env_wrapped.reset(options={"random_pos": False})
 
             eval_done, eval_ep_ret, eval_ep_len, eval_n_val_steps, self.metadata = (
                 False,
@@ -265,7 +265,6 @@ class ModelFreeRunner(BaseRunner):
                 # Take deterministic actions at test time
                 self.agent.deterministic = True
                 self.t = 1e6
-                eval_action_obj = self.agent.select_action(eval_obs_encoded)
                 eval_action_obj = self.agent.select_action(eval_obs_encoded)
                 (
                     eval_obs_encoded_new,
