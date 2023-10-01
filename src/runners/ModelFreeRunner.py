@@ -187,6 +187,7 @@ class ModelFreeRunner(BaseRunner):
 
             if self.wandb_logger:
                 print("INFO:", info)
+                # TODO: revise try-except
                 try:
                     # L2R
                     self.wandb_logger.log(
@@ -243,7 +244,8 @@ class ModelFreeRunner(BaseRunner):
 
         for j in range(self.num_test_episodes):
 
-            eval_obs_encoded = self.env_wrapped.reset(options={"random_pos": False})
+            eval_obs_encoded = self.env_wrapped.reset(
+                options={"random_pos": False})
 
             eval_done, eval_ep_ret, eval_ep_len, eval_n_val_steps, self.metadata = (
                 False,
@@ -252,7 +254,7 @@ class ModelFreeRunner(BaseRunner):
                 0,
                 {},
             )
-            
+
             experience, t_eval = [], 0
 
             while (not eval_done) & (eval_ep_len <= self.max_episode_length):
@@ -278,58 +280,68 @@ class ModelFreeRunner(BaseRunner):
             self.file_logger.log(f"[eval episode] Episode: {j} - {eval_info}")
 
             val_ep_rets.append(eval_ep_ret)
-            self.tb_logger_obj.log(
-                {
-                    "val/episodic_return": eval_ep_ret,
-                    "val/ep_n_steps": eval_n_val_steps,
-                    "val/ep_pct_complete": eval_info["metrics"]["pct_complete"],
-                    "val/ep_total_time": eval_info["metrics"]["total_time"],
-                    "val/ep_total_distance": eval_info["metrics"]["total_distance"],
-                    "val/ep_avg_speed": eval_info["metrics"]["average_speed_kph"],
-                    "val/ep_avg_disp_err": eval_info["metrics"][
-                        "average_displacement_error"
-                    ],
-                    "val/ep_traj_efficiency": eval_info["metrics"][
-                        "trajectory_efficiency"
-                    ],
-                    "val/ep_traj_admissibility": eval_info["metrics"][
-                        "trajectory_admissibility"
-                    ],
-                    "val/movement_smoothness": eval_info["metrics"][
-                        "movement_smoothness"
-                    ],
-                },
-                eval_n_val_steps,
-            )
+            # self.tb_logger_obj.log(
+            #     {
+            #         "val/episodic_return": eval_ep_ret,
+            #         "val/ep_n_steps": eval_n_val_steps,
+            #         "val/ep_pct_complete": eval_info["metrics"]["pct_complete"],
+            #         "val/ep_total_time": eval_info["metrics"]["total_time"],
+            #         "val/ep_total_distance": eval_info["metrics"]["total_distance"],
+            #         "val/ep_avg_speed": eval_info["metrics"]["average_speed_kph"],
+            #         "val/ep_avg_disp_err": eval_info["metrics"][
+            #             "average_displacement_error"
+            #         ],
+            #         "val/ep_traj_efficiency": eval_info["metrics"][
+            #             "trajectory_efficiency"
+            #         ],
+            #         "val/ep_traj_admissibility": eval_info["metrics"][
+            #             "trajectory_admissibility"
+            #         ],
+            #         "val/movement_smoothness": eval_info["metrics"][
+            #             "movement_smoothness"
+            #         ],
+            #     },
+            #     eval_n_val_steps,
+            # )
 
+            # TODO: revise try-except
             if self.wandb_logger:
-                self.wandb_logger.log(
-                    {
-                        "Eval reward": eval_ep_ret,
-                        "Eval Distance": eval_info["metrics"]["total_distance"],
-                        "Eval Time": eval_info["metrics"]["total_time"],
-                        "Eval Num infractions": eval_info["metrics"]["num_infractions"],
-                        "Evaluation Speed (KPH)": eval_info["metrics"][
-                            "average_speed_kph"
-                        ],
-                        "Eval Average Displacement Error": eval_info["metrics"][
-                            "average_displacement_error"
-                        ],
-                        "Eval Trajectory Efficiency": eval_info["metrics"][
-                            "trajectory_efficiency"
-                        ],
-                        "Eval Trajectory Admissability": eval_info["metrics"][
-                            "trajectory_admissibility"
-                        ],
-                        "Eval Movement Smoothness": eval_info["metrics"][
-                            "movement_smoothness"
-                        ],
-                        "Eval Timesteps per second": eval_info["metrics"][
-                            "timestep/sec"
-                        ],
-                        "Eval Laps completed": eval_info["metrics"]["laps_completed"],
-                    }
-                )
+                try:
+                    # L2R
+                    self.wandb_logger.log(
+                        {
+                            "Eval reward": eval_ep_ret,
+                            "Eval Distance": eval_info["metrics"]["total_distance"],
+                            "Eval Time": eval_info["metrics"]["total_time"],
+                            "Eval Num infractions": eval_info["metrics"]["num_infractions"],
+                            "Evaluation Speed (KPH)": eval_info["metrics"][
+                                "average_speed_kph"
+                            ],
+                            "Eval Average Displacement Error": eval_info["metrics"][
+                                "average_displacement_error"
+                            ],
+                            "Eval Trajectory Efficiency": eval_info["metrics"][
+                                "trajectory_efficiency"
+                            ],
+                            "Eval Trajectory Admissability": eval_info["metrics"][
+                                "trajectory_admissibility"
+                            ],
+                            "Eval Movement Smoothness": eval_info["metrics"][
+                                "movement_smoothness"
+                            ],
+                            "Eval Timesteps per second": eval_info["metrics"][
+                                "timestep/sec"
+                            ],
+                            "Eval Laps completed": eval_info["metrics"]["laps_completed"],
+                        }
+                    )
+                except:
+                    # Non-L2R
+                    self.wandb_logger.log(
+                        {
+                            "Eval reward": eval_ep_ret,
+                        }
+                    )
 
             # TODO: add back - info no longer contains "pct_complete"
 
