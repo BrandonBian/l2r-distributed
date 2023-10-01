@@ -60,9 +60,7 @@ class SACAgent(BaseAgent):
 
         self.record = {"transition_actor": ""}  # rename
 
-        self.action_space = Box(-1, 1, (2,))
-        self.act_dim = self.action_space.shape[0]
-        self.obs_dim = 32
+        self.action_space = Box(-1, 1, (self.actor_critic.action_dim,))
 
         self.actor_critic = create_configurable(
             actor_critic_cfg_path, NameToSourcePath.network
@@ -105,7 +103,9 @@ class SACAgent(BaseAgent):
         action_obj = ActionSample()
         if self.t > self.steps_to_sample_randomly:
             a = self.actor_critic.act(obs.to(DEVICE), self.deterministic)
-            a = a  # numpy array...
+            if a.shape == ():
+                # In case a is a scalar
+                a = np.array([a])
             action_obj.action = a
             self.record["transition_actor"] = "learner"
         else:
@@ -128,6 +128,10 @@ class SACAgent(BaseAgent):
             path (str): Load model from path.
         """
         self.actor_critic.load_state_dict(torch.load(path))
+
+    def state_dict(self):
+        """Emulate torch behavior; note to self to remove once better refactor comes in."""
+        return self.actor_critic.state_dict()
 
     def save_model(self, path):
         """Save model to path
