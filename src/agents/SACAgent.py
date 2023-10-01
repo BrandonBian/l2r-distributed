@@ -60,12 +60,13 @@ class SACAgent(BaseAgent):
 
         self.record = {"transition_actor": ""}  # rename
 
-        self.action_space = Box(-1, 1, (self.actor_critic.action_dim,))
-
         self.actor_critic = create_configurable(
             actor_critic_cfg_path, NameToSourcePath.network
         )
         self.actor_critic.to(DEVICE)
+
+        self.action_space = Box(-1, 1, (self.actor_critic.action_dim,))
+
         self.actor_critic_target = deepcopy(self.actor_critic)
 
         if self.load_checkpoint_from != "":
