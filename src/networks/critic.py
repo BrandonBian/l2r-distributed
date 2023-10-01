@@ -253,6 +253,7 @@ class ActorCritic(nn.Module):
         super().__init__()
         self.state_dim = state_dim
         obs_dim = state_dim
+        self.action_dim = act_dim
         act_dim = action_dim
         act_limit = max_action_value
         self.use_speed = use_speed
