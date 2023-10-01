@@ -192,27 +192,36 @@ class ModelFreeRunner(BaseRunner):
                     self.best_eval_ret = eval_ret
 
             if self.wandb_logger:
-                self.wandb_logger.log(
-                    {
-                        "reward": ep_ret,
-                        "Distance": info["metrics"]["total_distance"],
-                        "Time": info["metrics"]["total_time"],
-                        "Num infractions": info["metrics"]["num_infractions"],
-                        "Average Speed KPH": info["metrics"]["average_speed_kph"],
-                        "Average Displacement Error": info["metrics"][
-                            "average_displacement_error"
-                        ],
-                        "Trajectory Efficiency": info["metrics"][
-                            "trajectory_efficiency"
-                        ],
-                        "Trajectory Admissability": info["metrics"][
-                            "trajectory_admissibility"
-                        ],
-                        "Movement Smoothness": info["metrics"]["movement_smoothness"],
-                        "Timestep per Sec": info["metrics"]["timestep/sec"],
-                        "Laps Completed": info["metrics"]["laps_completed"],
-                    }
-                )
+                print("INFO:", info)
+                try:
+                    # L2R
+                    self.wandb_logger.log(
+                        {
+                            "reward": ep_ret,
+                            "Distance": info["metrics"]["total_distance"],
+                            "Time": info["metrics"]["total_time"],
+                            "Num infractions": info["metrics"]["num_infractions"],
+                            "Average Speed KPH": info["metrics"]["average_speed_kph"],
+                            "Average Displacement Error": info["metrics"][
+                                "average_displacement_error"
+                            ],
+                            "Trajectory Efficiency": info["metrics"][
+                                "trajectory_efficiency"
+                            ],
+                            "Trajectory Admissability": info["metrics"][
+                                "trajectory_admissibility"
+                            ],
+                            "Movement Smoothness": info["metrics"]["movement_smoothness"],
+                            "Timestep per Sec": info["metrics"]["timestep/sec"],
+                            "Laps Completed": info["metrics"]["laps_completed"],
+                        }
+                    )
+                except:
+                    self.wandb_logger.log(
+                        {
+                            "reward": ep_ret,
+                        }
+                    )
 
             self.file_logger.log(
                 f"Episode Number after WanDB call: {ep_number}")
