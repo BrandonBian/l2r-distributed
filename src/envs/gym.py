@@ -20,10 +20,11 @@ class GymEnv:
         self.env = gym.make(env_name)
 
     def step(self, action):
-        return self.env.step(action)
+        (obs_encoded_new, reward, done, info) = self.env.step(action)
+        return torch.Tensor(obs_encoded_new, device=DEVICE), reward, done, info
 
     def reset(self, options=None):
-        return self.env.reset()
+        return torch.Tensor(self.env.reset(), device=DEVICE)
 
     def __getattr__(self, name):
         try:

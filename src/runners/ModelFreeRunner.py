@@ -142,7 +142,6 @@ class ModelFreeRunner(BaseRunner):
             done = False
 
             obs_encoded = self.env_wrapped.reset(options={"random_pos": True})
-            obs_encoded = torch.Tensor(obs_encoded)
 
             ep_ret = 0
             total_reward = 0
@@ -154,11 +153,6 @@ class ModelFreeRunner(BaseRunner):
                 obs_encoded_new, reward, done, info = self.env_wrapped.step(
                     action_obj.action
                 )
-
-                obs_encoded_new = torch.Tensor(obs_encoded_new)
-
-                obs_encoded.to(DEVICE)
-                obs_encoded_new.to(DEVICE)
 
                 ep_ret += reward
 
