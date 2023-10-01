@@ -186,7 +186,6 @@ class ModelFreeRunner(BaseRunner):
                     self.best_eval_ret = eval_ret
 
             if self.wandb_logger:
-                print("INFO:", info)
                 # TODO: revise try-except
                 try:
                     # L2R
@@ -213,6 +212,7 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
+                    print("[Train Reward]:", ep_ret)
                     self.wandb_logger.log(
                         {
                             "reward": ep_ret,
@@ -236,7 +236,7 @@ class ModelFreeRunner(BaseRunner):
         Returns:
             float: The max reward for each test session.
         """
-        print("Evaluation:")
+        print(">> Evaluation:")
         val_ep_rets = []
 
         # Not implemented for logging multiple test episodes
@@ -337,6 +337,7 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
+                    print("[Eval reward]:", eval_ep_ret)
                     self.wandb_logger.log(
                         {
                             "Eval reward": eval_ep_ret,
@@ -344,8 +345,8 @@ class ModelFreeRunner(BaseRunner):
                     )
 
             # TODO: add back - info no longer contains "pct_complete"
-
             # self.agent.update_best_pct_complete(info)
+
         return max(val_ep_rets)
 
     def checkpoint_model(self, ep_ret, ep_number):
