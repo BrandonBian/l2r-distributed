@@ -186,7 +186,7 @@ class ModelFreeRunner(BaseRunner):
             if ep_number % self.eval_every == 0:
                 self.file_logger.log(
                     f"Episode Number before eval: {ep_number}")
-                eval_ret = self.eval(env)
+                eval_ret = self.eval()
                 self.file_logger.log(f"Episode Number after eval: {ep_number}")
                 if eval_ret > self.best_eval_ret:
                     self.best_eval_ret = eval_ret
@@ -217,6 +217,7 @@ class ModelFreeRunner(BaseRunner):
                         }
                     )
                 except:
+                    # Non-L2R
                     self.wandb_logger.log(
                         {
                             "reward": ep_ret,
@@ -231,11 +232,11 @@ class ModelFreeRunner(BaseRunner):
             )
             self.checkpoint_model(ep_ret, ep_number)
 
-    def eval(self, env):
+    def eval(self):
         """Evaluate model on the evaluation environment, using a deterministic agent if possible.
 
         Args:
-            env (gym.env): Some gym-compliant environment.
+            None
 
         Returns:
             float: The max reward for each test session.
@@ -257,6 +258,7 @@ class ModelFreeRunner(BaseRunner):
                 0,
                 {},
             )
+            
             experience, t_eval = [], 0
 
             while (not eval_done) & (eval_ep_len <= self.max_episode_length):
