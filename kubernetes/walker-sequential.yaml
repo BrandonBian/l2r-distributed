@@ -3,10 +3,10 @@ kind: Pod
 metadata:
   name: walker-sequential
   labels:
-    tier: worker-set
+    tier: walker-sequential
 spec:
   containers:
-  - name: walker-container
+  - name: walker-sequential
     tty: true
     stdin: true
     resources:

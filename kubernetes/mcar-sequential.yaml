@@ -3,10 +3,10 @@ kind: Pod
 metadata:
   name: mcar-sequential
   labels:
-    tier: worker-set
+    tier: mcar-sequential
 spec:
   containers:
-  - name: worker-container
+  - name: mcar-sequential
     tty: true
     stdin: true
     resources:

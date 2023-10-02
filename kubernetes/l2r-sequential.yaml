@@ -3,10 +3,10 @@ kind: Pod
 metadata:
   name: l2r-sequential
   labels:
-    tier: worker-set
+    tier: l2r-sequential
 spec:
   containers:
-    - name: worker-container
+    - name: l2r-sequential
       tty: true
       stdin: true
       resources:
