@@ -30,6 +30,11 @@ if __name__ == "__main__":
     elif args.env == "mcar":
         runner = create_configurable(
             "config_files/mcar_sac/runner.yaml", NameToSourcePath.runner)
+    elif args.env == "walker":
+        runner = create_configurable(
+            "config_files/walker_sac/runner.yaml", NameToSourcePath.runner)
+    else:
+        raise NotImplementedError
 
     torch.autograd.set_detect_anomaly(True)
     runner.run(args.wandb_apikey)
