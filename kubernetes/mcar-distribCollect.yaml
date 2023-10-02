@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: mcar-workers
+  name: mcar-dcollect-workers
   labels:
-    tier: worker-set
+    tier: mcar-dcollect-workers
 spec:
   # 2 to start, then for phortx 30-40 is the upper bound probably
   replicas: 3
   selector:
     matchLabels:
-      tier: worker-set
+      tier: mcar-dcollect-workers
   template:
     metadata:
       labels:
-        tier: worker-set
+        tier: mcar-dcollect-workers
     spec:
       nodeSelector:
         # we don't specify the cluster, maybe it's ok to just delete the phortx stuff?
@@ -21,7 +21,7 @@ spec:
         nodetype: phortx
 
       containers:
-        - name: worker-container
+        - name: mcar-dcollect-workers
           tty: true
           stdin: true
           resources: # Maybe a good idea to have the learner on its own gpu, specify like below
@@ -51,7 +51,7 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mcar-learner
+  name: mcar-dcollect-learner
   labels:
     app.kubernetes.io/name: proxy
 spec:
@@ -59,7 +59,7 @@ spec:
   nodeSelector:
     nodetype: phortx
   containers:
-    - name: learner-container
+    - name: mcar-dcollect-learner
       tty: true
       stdin: true
       resources: # Maybe a good idea to have the learner on its own gpu, specify like below
@@ -83,12 +83,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mcar-learner-service
+  name: mcar-dcollect-learner
 spec:
   selector:
     app.kubernetes.io/name: proxy
   ports:
-    - name: learner-service-port
+    - name: mcar-dcollect-learner
       protocol: TCP
       port: 4444
       targetPort: learner-port
