@@ -19,10 +19,16 @@ if __name__ == "__main__":
         help="Enter your Weights-And-Bias API Key."
     )
 
+    parser.add_argument(
+        "--exp_name",
+        type=str,
+        help="Enter your experiment name, to be recorded by Weights-And-Bias."
+    )
+
     args = parser.parse_args()
 
     # Initialize the runner and start run
-    print(f"Environment: {args.env}")
+    print(f"Environment: {args.env} | Experiment: {args.exp_name}")
 
     if args.env == "l2r":
         runner = create_configurable(
@@ -37,4 +43,4 @@ if __name__ == "__main__":
         raise NotImplementedError
 
     torch.autograd.set_detect_anomaly(True)
-    runner.run(args.wandb_apikey)
+    runner.run(args.wandb_apikey, args.exp_name)

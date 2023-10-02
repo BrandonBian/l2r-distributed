@@ -123,17 +123,18 @@ class ModelFreeRunner(BaseRunner):
                 api_key=self.api_key, project_name="test-project"
             )"""
 
-    def run(self, api_key: str):
+    def run(self, api_key: str, exp_name: str):
         """Train an agent, with our given parameters, on the environment in question.
 
         Args:
             env (gym.env): Some gym-compliant environment, preferrably wrapped using a wrapper
             api_key (str, optional): Wandb API key for logging. Defaults to ''.
+            exp_name (str, optional): Experiment name for logging in Wandb.
         """
         self.wandb_logger = None
         if api_key:
             self.wandb_logger = WanDBLogger(
-                api_key=api_key, project_name="l2r"
+                api_key=api_key, project_name="l2r", name=exp_name
             )
         t = 0
         start_idx = self.last_saved_episode
