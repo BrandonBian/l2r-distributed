@@ -18,11 +18,10 @@ if __name__ == "__main__":
 
     # Configure learner IP (by agent)
     if agent_name == "walker":
-        learner_ip = socket.gethostbyname("walker-learner-service")
+        learner_ip = socket.gethostbyname(f"walker-{training_paradigm.lower()}-learner")
         learner_address = (learner_ip, 4445)
-
     elif agent_name == "mcar":
-        learner_ip = socket.gethostbyname("mcar-learner-service")
+        learner_ip = socket.gethostbyname(f"mcar-{training_paradigm.lower()}-learner")
         learner_address = (learner_ip, 4444)
     else:
         raise NotImplementedError
