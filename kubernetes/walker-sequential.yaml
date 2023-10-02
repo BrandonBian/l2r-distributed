@@ -35,4 +35,4 @@ spec:
       pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment &&
       pip install -r setup/devtools_reqs.txt &&
       pip install "opencv-python-headless<4.3" gym[box2d] protobuf==3.20.* &&
-      python3.8 -m scripts.main --env walker --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
+      python3.8 -m scripts.main --env walker --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name walker-sequential

@@ -41,4 +41,4 @@ spec:
           cd / &&
           cd l2r-distributed &&
           git checkout sequential &&
-          python3.8 -m scripts.main --env l2r --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
+          python3.8 -m scripts.main --env l2r --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name l2r-sequential
