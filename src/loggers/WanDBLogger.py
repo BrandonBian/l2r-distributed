@@ -9,16 +9,17 @@ from datetime import datetime
 class WanDBLogger(BaseLogger):
     """Wandb Logger Wrapper."""
 
-    def __init__(self, api_key: str, project_name: str) -> None:
+    def __init__(self, api_key: str, project_name: str, exp_name: str) -> None:
         """Create Weights and Biases Logger
 
         Args:
             api_key (str): api key (DO NOT STORE IN REPO)
             project_name (str): project name
+            exp_name (str): the experiment name (name of the run)
         """
         # super().__init__(log_dir, experiment_name)
         wandb.login(key=api_key)
-        wandb.init(project=project_name, entity="sbian")
+        wandb.init(project=project_name, entity="sbian", name=exp_name)
 
     def log(self, data):
         """Log metrics to WandB, using names present in dict.

@@ -134,7 +134,7 @@ class ModelFreeRunner(BaseRunner):
         self.wandb_logger = None
         if api_key:
             self.wandb_logger = WanDBLogger(
-                api_key=api_key, project_name="l2r", name=exp_name
+                api_key=api_key, project_name="l2r", exp_name=exp_name
             )
         t = 0
         start_idx = self.last_saved_episode
