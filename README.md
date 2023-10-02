@@ -1,14 +1,17 @@
 # Learn-to-Race: Distributed RL with Optimizations
 
 ## Progress
-| RL Agent            | Training Paradigm      | YAML Source File             |
-| ------------------- | ---------------------- | ---------------------------- |
-| Mountain Car        | Distributed Collection | `mcar-distribCollect.yaml`   |
-| Mountain Car        | Distributed Update     | `mcar-distribUpdate.yaml`    |
-| Bipedal Walker      | Distributed Collection | `walker-distribCollect.yaml` |
-| Bipedal Walker      | Distributed Update     | `walker-distribUpdate.yaml`  |
-| Learn-to-race Agent | Distributed Collection | `l2r-distribCollect.yaml`    |
-| Learn-to-race Agent | Distributed Update     | `l2r-distribUpdate.yaml`     |
+| RL Environments                           | Training Paradigm      | YAML Source File             |
+| ----------------------------------------- | ---------------------- | ---------------------------- |
+| Mountain Car (`MountainCarContinuous-v0`) | Distributed Collection | `mcar-distribCollect.yaml`   |
+| Mountain Car (`MountainCarContinuous-v0`) | Distributed Update     | `mcar-distribUpdate.yaml`    |
+| Mountain Car (`MountainCarContinuous-v0`) | Sequential             | `mcar-sequential.yaml`       |
+| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Collection | `walker-distribCollect.yaml` |
+| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Update     | `walker-distribUpdate.yaml`  |
+| Bipedal Walker (`BipedalWalker-v3`)       | Sequential             | `walker-sequential.yaml`     |
+| Learn-to-race                             | Distributed Collection | `l2r-distribCollect.yaml`    |
+| Learn-to-race                             | Distributed Update     | `l2r-distribUpdate.yaml`     |
+| Learn-to-race                             | Sequential             | `l2r-sequential.yaml`        |
 
 
 ## Basic Kubernetes control commands
