@@ -3,14 +3,14 @@
 ## Progress
 | RL Environments                           | Training Paradigm      | YAML Source File             |
 | ----------------------------------------- | ---------------------- | ---------------------------- |
-| Mountain Car (`MountainCarContinuous-v0`) | Distributed Collection | `mcar-distribCollect.yaml`   |
-| Mountain Car (`MountainCarContinuous-v0`) | Distributed Update     | `mcar-distribUpdate.yaml`    |
+| Mountain Car (`MountainCarContinuous-v0`) | Distributed Collection | `mcar-dCollect.yaml`   |
+| Mountain Car (`MountainCarContinuous-v0`) | Distributed Update     | `mcar-dUpdate.yaml`    |
 | Mountain Car (`MountainCarContinuous-v0`) | Sequential             | `mcar-sequential.yaml`       |
-| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Collection | `walker-distribCollect.yaml` |
-| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Update     | `walker-distribUpdate.yaml`  |
+| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Collection | `walker-dCollect.yaml` |
+| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Update     | `walker-dUpdate.yaml`  |
 | Bipedal Walker (`BipedalWalker-v3`)       | Sequential             | `walker-sequential.yaml`     |
-| Learn-to-race                             | Distributed Collection | `l2r-distribCollect.yaml`    |
-| Learn-to-race                             | Distributed Update     | `l2r-distribUpdate.yaml`     |
+| Learn-to-race                             | Distributed Collection | `l2r-dCollect.yaml`    |
+| Learn-to-race                             | Distributed Update     | `l2r-dUpdate.yaml`     |
 | Learn-to-race                             | Sequential             | `l2r-sequential.yaml`        |
 
 
