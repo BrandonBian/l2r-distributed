@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Configure learner IP (by agent)
     if agent_name == "walker":
         learner_ip = socket.gethostbyname("walker-learner-service")
-        learner_address = (learner_ip, 4444)
+        learner_address = (learner_ip, 4445)
 
     elif agent_name == "mcar":
         learner_ip = socket.gethostbyname("mcar-learner-service")
