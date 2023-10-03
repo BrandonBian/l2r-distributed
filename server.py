@@ -25,6 +25,12 @@ if __name__ == "__main__":
         help="Select the distributed training paradigm ('dCollect', 'dUpdate')."
     )
 
+    parser.add_argument(
+        "--wandb_apikey",
+        type=str,
+        help="Enter your Weights-And-Bias API Key."
+    )
+
     args = parser.parse_args()
     print(f"Server Configured - '{args.env}'")
     print(f"Training Paradigm Configured - '{args.paradigm}'")
@@ -37,14 +43,14 @@ if __name__ == "__main__":
                 agent=create_configurable(
                     "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
                 ),
-                api_key=sys.argv[1],
+                api_key=args.wandb_apikey,
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
                 agent=create_configurable(
                     "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
                 ),
-                api_key=sys.argv[1],
+                api_key=args.wandb_apikey,
             )
         else:
             raise NotImplementedError
@@ -56,14 +62,14 @@ if __name__ == "__main__":
                 agent=create_configurable(
                     "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
                 ),
-                api_key=sys.argv[1],
+                api_key=args.wandb_apikey,
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
                 agent=create_configurable(
                     "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
                 ),
-                api_key=sys.argv[1],
+                api_key=args.wandb_apikey,
             )
         else:
             raise NotImplementedError
