@@ -1,35 +1,60 @@
 import socket
 import os
+import argparse
 
 # Training Paradigm - Distributed Collection (DistribCollect)
 from distrib_l2r.asynchron.distribCollect.worker import DistribCollect_AsnycWorker
+
 # Training Paradigm - Distributed Update (DistribUpdate)
 from distrib_l2r.asynchron.distribUpdate.worker import DistribUpdate_AsnycWorker
 
 if __name__ == "__main__":
 
-    # Define the RL agent
-    agent_name = os.getenv("AGENT_NAME").strip()
-    print(f"Worker Configured - '{agent_name}'")
+    # Argparse for environment + training paradigm selection and wandb config
+    parser = argparse.ArgumentParser()
 
-    # Define the training paradigm
-    training_paradigm = os.getenv("TRAINING_PARADIGM").strip()
-    print(f"Training Paradigm Configured - '{training_paradigm}'")
+    parser.add_argument(
+        "--env",
+        choices=["l2r", "mcar", "walker"],
+        help="Select the environment ('l2r', 'mcar', or 'walker')."
+    )
 
-    # Configure learner IP (by agent)
-    if agent_name == "walker":
-        learner_ip = socket.gethostbyname(f"walker-{training_paradigm.lower()}-learner")
-        learner_address = (learner_ip, 4445)
-    elif agent_name == "mcar":
-        learner_ip = socket.gethostbyname(f"mcar-{training_paradigm.lower()}-learner")
+    parser.add_argument(
+        "--paradigm",
+        choices=["dCollect", "dUpdate"],
+        help="Select the distributed training paradigm ('dCollect', 'dUpdate')."
+    )
+
+    parser.add_argument(
+        "--wandb_apikey",
+        type=str,
+        help="Enter your Weights-And-Bias API Key."
+    )
+
+    parser.add_argument(
+        "--exp_name",
+        type=str,
+        help="Enter your experiment name, to be recorded by Weights-And-Bias."
+    )
+
+    args = parser.parse_args()
+    print(f"Worker Configured - '{args.env}'")
+    print(f"Training Paradigm Configured - '{args.paradigm}'")
+
+    # Configure learner IP (by environment)
+    if args.env == "mcar":
+        learner_ip = socket.gethostbyname(f"mcar-{args.paradigm.lower()}-learner")
         learner_address = (learner_ip, 4444)
+    elif args.env == "walker":
+        learner_ip = socket.gethostbyname(f"walker-{args.paradigm.lower()}-learner")
+        learner_address = (learner_ip, 4445)
     else:
         raise NotImplementedError
     
     # Configure worker (by training paradigm)
-    if training_paradigm == "distribCollect":
+    if args.paradigm == "dCollect":
         worker = DistribCollect_AsnycWorker(learner_address=learner_address)
-    elif training_paradigm == "distribUpdate":
+    elif args.paradigm == "dUpdate":
         worker = DistribUpdate_AsnycWorker(learner_address=learner_address)
     else:
         raise NotImplementedError

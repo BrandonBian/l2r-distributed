@@ -1,7 +1,7 @@
 from src.config.yamlize import NameToSourcePath, create_configurable
 import threading
 import sys
-import os
+import argparse
 
 # Training Paradigm - Distributed Collection (DistribCollect)
 from distrib_l2r.asynchron.distribCollect.learner import DistribCollect_AsyncLearningNode
@@ -10,25 +10,36 @@ from distrib_l2r.asynchron.distribUpdate.learner import DistribUpdate_AsyncLearn
 
 if __name__ == "__main__":
 
-    # Define the RL agent
-    agent_name = os.getenv("AGENT_NAME").strip()
-    print(f"Learner Initialized: '{agent_name}'")
+    # Argparse for environment + training paradigm selection and wandb config
+    parser = argparse.ArgumentParser()
 
-    # Define the training paradigm
-    training_paradigm = os.getenv("TRAINING_PARADIGM").strip()
-    print(f"Training Paradigm Configured - '{training_paradigm}'")
+    parser.add_argument(
+        "--env",
+        choices=["l2r", "mcar", "walker"],
+        help="Select the environment ('l2r', 'mcar', or 'walker')."
+    )
 
-    if agent_name == "walker":
+    parser.add_argument(
+        "--paradigm",
+        choices=["dCollect", "dUpdate"],
+        help="Select the distributed training paradigm ('dCollect', 'dUpdate')."
+    )
+
+    args = parser.parse_args()
+    print(f"Server Configured - '{args.env}'")
+    print(f"Training Paradigm Configured - '{args.paradigm}'")
+
+    if args.env == "walker":
         # https://www.gymlibrary.dev/environments/box2d/bipedal_walker/
 
-        if training_paradigm == "distribCollect":
+        if args.paradigm == "dCollect":
             learner = DistribCollect_AsyncLearningNode(
                 agent=create_configurable(
                     "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=sys.argv[1],
             )
-        elif training_paradigm == "distribUpdate":
+        elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
                 agent=create_configurable(
                     "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
@@ -37,17 +48,17 @@ if __name__ == "__main__":
             )
         else:
             raise NotImplementedError
-    elif agent_name == "mcar":
+    elif args.env == "mcar":
         # https://mgoulao.github.io/gym-docs/environments/classic_control/mountain_car_continuous/
 
-        if training_paradigm == "distribCollect":
+        if args.paradigm == "dCollect":
             learner = DistribCollect_AsyncLearningNode(
                 agent=create_configurable(
                     "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=sys.argv[1],
             )
-        elif training_paradigm == "distribUpdate":
+        elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
                 agent=create_configurable(
                     "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
