@@ -175,6 +175,7 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             save_func: Optional[Callable] = None,
             save_freq: Optional[int] = None,
             api_key: str = "",
+            exp_name: str = "Undefined Distributed Run"
     ) -> None:
         self.numThreads = 5  # Hardcode for now
         super().__init__(server_address, ThreadedTCPRequestHandler)
@@ -213,7 +214,7 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.buffer_queue = queue.LifoQueue(300)
 
         self.wandb_logger = WanDBLogger(
-            api_key=api_key, project_name="l2r")
+            api_key=api_key, project_name="l2r", exp_name=exp_name)
         # Save function, called optionally
         self.save_func = save_func
 
