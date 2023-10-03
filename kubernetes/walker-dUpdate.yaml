@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: walker-workers
+  name: walker-dupdate-workers
   labels:
-    tier: worker-set
+    tier: walker-dupdate-workers
 spec:
   # 2 to start, then for phortx 30-40 is the upper bound probably
   replicas: 3
   selector:
     matchLabels:
-      tier: worker-set
+      tier: walker-dupdate-workers
   template:
     metadata:
       labels:
-        tier: worker-set
+        tier: walker-dupdate-workers
     spec:
       nodeSelector:
         # we don't specify the cluster, maybe it's ok to just delete the phortx stuff?
@@ -21,7 +21,7 @@ spec:
         nodetype: phortx
       
       containers:
-      - name: worker-container
+      - name: walker-dupdate-workers
         tty: true
         stdin: true
         resources: # Maybe a good idea to have the learner on its own gpu, specify like below
@@ -46,13 +46,13 @@ spec:
               pip3 install -r setup/devtools_reqs.txt &&
               pip3 install wandb tensorboardX jsonpickle &&
               pip3 install gym[box2d] protobuf==3.20.* &&
-              python3 worker.py
+              python3 worker.py --env walker --paradigm dUpdate
 
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: walker-learner
+  name: walker-dupdate-learner
   labels:
     app.kubernetes.io/name: proxy
 spec:
@@ -60,7 +60,7 @@ spec:
   nodeSelector:
     nodetype: phortx
   containers:
-    - name: learner-container
+    - name: walker-dupdate-learner
       tty: true
       stdin: true
       resources: # Maybe a good idea to have the learner on its own gpu, specify like below
@@ -76,24 +76,24 @@ spec:
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd "$(\ls -1dt ./*/ | head -n 1)" &&
           pip3 install gym[box2d] protobuf==3.20.* &&
-          python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
+          python3 server.py --env walker --paradigm dUpdate --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name walker-dUpdate-3Workers
 
       ports:
-      - name: learner-port
-        containerPort: 4445
+      - name: walker-dupdate
+        containerPort: 4444
 --- 
 apiVersion: v1
 kind: Service
 metadata:
-  name: walker-learner-service
+  name: walker-dupdate-learner
 spec:
   selector:
     app.kubernetes.io/name: proxy
   ports:
-  - name: learner-service-port
+  - name: walker-dupdate
     protocol: TCP
-    port: 4445
-    targetPort: learner-port
+    port: 4444
+    targetPort: walker-dupdate
 ---
 
 
