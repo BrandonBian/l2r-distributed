@@ -31,6 +31,12 @@ if __name__ == "__main__":
         help="Enter your Weights-And-Bias API Key."
     )
 
+    parser.add_argument(
+        "--exp_name",
+        type=str,
+        help="Enter your experiment name, to be recorded by Weights-And-Bias."
+    )
+
     args = parser.parse_args()
     print(f"Server Configured - '{args.env}'")
     print(f"Training Paradigm Configured - '{args.paradigm}'")
@@ -44,6 +50,7 @@ if __name__ == "__main__":
                     "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
+                exp_name=args.exp_name
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
@@ -51,6 +58,7 @@ if __name__ == "__main__":
                     "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
+                exp_name=args.exp_name
             )
         else:
             raise NotImplementedError
@@ -63,6 +71,7 @@ if __name__ == "__main__":
                     "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
+                exp_name=args.exp_name
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
@@ -70,6 +79,7 @@ if __name__ == "__main__":
                     "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
+                exp_name=args.exp_name
             )
         else:
             raise NotImplementedError

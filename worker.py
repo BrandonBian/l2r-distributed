@@ -24,18 +24,7 @@ if __name__ == "__main__":
         choices=["dCollect", "dUpdate"],
         help="Select the distributed training paradigm ('dCollect', 'dUpdate')."
     )
-
-    parser.add_argument(
-        "--wandb_apikey",
-        type=str,
-        help="Enter your Weights-And-Bias API Key."
-    )
-
-    parser.add_argument(
-        "--exp_name",
-        type=str,
-        help="Enter your experiment name, to be recorded by Weights-And-Bias."
-    )
+    
 
     args = parser.parse_args()
     print(f"Worker Configured - '{args.env}'")
