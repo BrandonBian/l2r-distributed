@@ -46,7 +46,7 @@ spec:
               pip3 install -r setup/devtools_reqs.txt &&
               pip3 install wandb tensorboardX jsonpickle &&
               pip3 install gym[box2d] protobuf==3.20.* &&
-              python3 worker.py
+              python3 worker.py --env mcar --paradigm dCollect
 ---
 apiVersion: v1
 kind: Pod
@@ -70,14 +70,14 @@ spec:
         - /bin/bash
         - -c
         - export AGENT_NAME=mcar &&
-          export TRAINING_PARADIGM=distribCollect &&
+          export TRAINING_PARADIGM=dCollect &&
           pip3 install tianshou gym strictyaml wandb line_profiler &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd "$(\ls -1dt ./*/ | head -n 1)" &&
           pip3 install gym[box2d] protobuf==3.20.* &&
-          python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
+          python3 server.py --env mcar --paradigm dCollect --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name mcar-dCollect-3Workers
       ports:
-        - name: learner-port
+        - name: mcar-dcollect
           containerPort: 4444
 ---
 apiVersion: v1
@@ -88,10 +88,10 @@ spec:
   selector:
     app.kubernetes.io/name: proxy
   ports:
-    - name: mcar-dcollect-learner
+    - name: mcar-dcollect
       protocol: TCP
       port: 4444
-      targetPort: learner-port
+      targetPort: mcar-dcollect
 ---
 #### Or we can run mulitple experiments by specifying node for a diff experiment
 
