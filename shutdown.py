@@ -24,10 +24,19 @@ else:
     training_paradigm = training_paradigm.lower()
 
     # Delete replicaset
-    subprocess.run(["kubectl", "delete", "replicaset", f"{RL_env}-{training_paradigm}-workers"], check=True)
+    try:
+        subprocess.run(["kubectl", "delete", "replicaset", f"{RL_env}-{training_paradigm}-workers"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Shutdown error: {e}")
     
     # Delete service
-    subprocess.run(["kubectl", "delete", "service", f"{RL_env}-{training_paradigm}-learner"], check=True)
+    try:
+        subprocess.run(["kubectl", "delete", "service", f"{RL_env}-{training_paradigm}-learner"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Shutdown error: {e}")
 
     # Delete learner pod
-    subprocess.run(["kubectl", "delete", "pod", f"{RL_env}-{training_paradigm}-learner"], check=True)
+    try:
+        subprocess.run(["kubectl", "delete", "pod", f"{RL_env}-{training_paradigm}-learner"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Shutdown error: {e}")
