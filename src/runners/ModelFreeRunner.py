@@ -209,6 +209,7 @@ class ModelFreeRunner(BaseRunner):
                             "Movement Smoothness": info["metrics"]["movement_smoothness"],
                             "Timestep per Sec": info["metrics"]["timestep/sec"],
                             "Laps Completed": info["metrics"]["laps_completed"],
+                            "Success Rate": info['metrics']['success_rate']
                         }
                     )
                 except:
@@ -334,6 +335,7 @@ class ModelFreeRunner(BaseRunner):
                                 "timestep/sec"
                             ],
                             "Eval Laps completed": eval_info["metrics"]["laps_completed"],
+                            "Eval Success Rate": eval_info['metrics']['success_rate']
                         }
                     )
                 except:
