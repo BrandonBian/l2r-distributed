@@ -8,5 +8,12 @@ config:
     config:
       use_speed:
         True
+      fusion_hiddens:
+        - 128
+        - 128
   use_speed:
     True
+  fusion_hiddens:
+    - 128
+    - 128
+
