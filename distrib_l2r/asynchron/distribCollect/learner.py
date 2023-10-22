@@ -89,16 +89,17 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # Received a replay buffer from a worker
         # Add this to buff
         if isinstance(msg, BufferMsg):
+            print("BufferMsg")
             self.server.buffer_queue.put(msg.data)
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
         elif isinstance(msg, InitMsg):
-            logging.info("Received init message")
+            print("InitMsg")
 
         # Received evaluation results from a worker
         elif isinstance(msg, EvalResultsMsg):
-            print("Received:", msg.data)
+            print("EvalResultsMsg: Eval Reward =", msg.data["reward"])
             
             if agent_name != "l2r":
                 self.server.wandb_logger.log_metric(
@@ -107,7 +108,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             else:
                 self.server.wandb_logger.log(
                     {
-                        "reward": msg.data["reward"],
+                        "Reward": msg.data["reward"],
                         "Distance": msg.data["total_distance"],
                         "Time": msg.data["total_time"],
                         "Num infractions": msg.data["num_infractions"],
