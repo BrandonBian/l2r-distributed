@@ -96,12 +96,12 @@ class DistribCollect_AsnycWorker:
         if agent_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
-                "config_files/async_sac_mountaincar/distribCollect_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_mcar/distribCollect_worker.yaml", NameToSourcePath.runner
             )
         elif agent_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
-                "config_files/async_sac_bipedalwalker/distribCollect_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_walker/distribCollect_worker.yaml", NameToSourcePath.runner
             )
         else:
             raise NotImplementedError

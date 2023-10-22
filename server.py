@@ -46,7 +46,7 @@ if __name__ == "__main__":
         if args.paradigm == "dCollect":
             learner = DistribCollect_AsyncLearningNode(
                 agent=create_configurable(
-                    "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
+                    "config_files/async_sac_walker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
                 exp_name=args.exp_name
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
                 agent=create_configurable(
-                    "config_files/async_sac_bipedalwalker/agent.yaml", NameToSourcePath.agent
+                    "config_files/async_sac_walker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
                 exp_name=args.exp_name
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         if args.paradigm == "dCollect":
             learner = DistribCollect_AsyncLearningNode(
                 agent=create_configurable(
-                    "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
+                    "config_files/async_sac_mcar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
                 exp_name=args.exp_name
@@ -75,7 +75,7 @@ if __name__ == "__main__":
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
                 agent=create_configurable(
-                    "config_files/async_sac_mountaincar/agent.yaml", NameToSourcePath.agent
+                    "config_files/async_sac_mcar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
                 exp_name=args.exp_name

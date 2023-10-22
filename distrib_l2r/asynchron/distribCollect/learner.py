@@ -154,11 +154,11 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.buffer_size = buffer_size
         if agent_name == "mcar":
             self.replay_buffer = create_configurable(
-                "config_files/async_sac_mountaincar/buffer.yaml", NameToSourcePath.buffer
+                "config_files/async_sac_mcar/buffer.yaml", NameToSourcePath.buffer
             )
         elif agent_name == "walker":
             self.replay_buffer = create_configurable(
-                "config_files/async_sac_bipedalwalker/buffer.yaml", NameToSourcePath.buffer
+                "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
             )
         else:
             raise NotImplementedError
