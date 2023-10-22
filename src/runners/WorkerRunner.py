@@ -44,7 +44,7 @@ class DistribCollect_WorkerRunner(BaseRunner):
         self.agent.load_model(agent_params)
         t = 0
         done = False
-        state_encoded, info = env.reset()
+        state_encoded = env.reset()
         state_encoded = torch.Tensor(state_encoded)
 
         ep_ret = 0
@@ -55,14 +55,13 @@ class DistribCollect_WorkerRunner(BaseRunner):
             t += 1
             self.agent.deterministic = not is_train
             action_obj = self.agent.select_action(state_encoded)
-            next_state_encoded, reward, done, terminated, _ = env.step(
+            next_state_encoded, reward, done, info = env.step(
                 action_obj.action)
 
             # print(f'info{info}')
             next_state_encoded = torch.Tensor(next_state_encoded)
             state_encoded.to(DEVICE)
             next_state_encoded.to(DEVICE)
-            done = done or terminated
             ep_ret += reward
 
             self.replay_buffer.store(
@@ -134,13 +133,12 @@ class DistribUpdate_WorkerRunner(BaseRunner):
             self.agent.deterministic = (task == Task.EVAL)
 
             action_obj = self.agent.select_action(state_encoded)
-            next_state_encoded, reward, done, terminated, _ = env.step(
+            next_state_encoded, reward, done, info = env.step(
                 action_obj.action)
 
             next_state_encoded = torch.Tensor(next_state_encoded)
             state_encoded.to(DEVICE)
             next_state_encoded.to(DEVICE)
-            done = done or terminated
             ep_ret += reward
 
             self.replay_buffer.store(
