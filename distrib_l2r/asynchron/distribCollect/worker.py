@@ -24,6 +24,8 @@ from distrib_l2r.api import EvalResultsMsg
 from distrib_l2r.api import InitMsg
 from distrib_l2r.utils import send_data
 
+from l2r import build_env
+
 logging.getLogger('').setLevel(logging.INFO)
 
 # pip install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment
@@ -47,51 +49,6 @@ class DistribCollect_AsnycWorker:
         self.learner_address = learner_address
         self.buffer_size = buffer_size
         self.mean_reward = 0.0
-        """ 
-        self.env = build_env(controller_kwargs={"quiet": True},
-           env_kwargs=
-                   {
-                       "multimodal": True,
-                       "eval_mode": True,
-                       "n_eval_laps": 5,
-                       "max_timesteps": 5000,
-                       "obs_delay": 0.1,
-                       "not_moving_timeout": 50000,
-                       "reward_pol": "custom",
-                       "provide_waypoints": False,
-                       "active_sensors": [
-                           "CameraFrontRGB"
-                       ],
-                       "vehicle_params":False,
-                   },
-           action_cfg=
-                   {
-                       "ip": "0.0.0.0",
-                       "port": 7077,
-                       "max_steer": 0.3,
-                       "min_steer": -0.3,
-                       "max_accel": 6.0,
-                       "min_accel": -1,
-                   },
-            camera_cfg=[
-                {
-                    "name": "CameraFrontRGB",
-                    "Addr": "tcp://0.0.0.0:8008",
-                    "Width": 512,
-                    "Height": 384,
-                    "sim_addr": "tcp://0.0.0.0:8008",
-                }
-            ]
-                   )
-
-        self.encoder = create_configurable(
-            "config_files/async_sac_mountaincar/encoder.yaml", NameToSourcePath.encoder
-        )
-        self.encoder.to(DEVICE)
-
-        self.env.action_space = gym.spaces.Box(np.array([-1, -1]), np.array([1.0, 1.0]))
-        self.env = EnvContainer(self.encoder, self.env) 
-        """
 
         if agent_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
@@ -103,6 +60,54 @@ class DistribCollect_AsnycWorker:
             self.runner = create_configurable(
                 "config_files/async_sac_walker/distribCollect_worker.yaml", NameToSourcePath.runner
             )
+        elif agent_name == "l2r":
+            self.env = build_env(
+                controller_kwargs={"quiet": True},
+                env_kwargs=
+                    {
+                        "multimodal": True,
+                        "eval_mode": True,
+                        "n_eval_laps": 5,
+                        "max_timesteps": 5000,
+                        "obs_delay": 0.1,
+                        "not_moving_timeout": 50000,
+                        "reward_pol": "custom",
+                        "provide_waypoints": False,
+                        "active_sensors": [
+                            "CameraFrontRGB"
+                        ],
+                        "vehicle_params":False,
+                    },
+                action_cfg=
+                    {
+                        "ip": "0.0.0.0",
+                        "port": 7077,
+                        "max_steer": 0.3,
+                        "min_steer": -0.3,
+                        "max_accel": 6.0,
+                        "min_accel": -1,
+                    },
+                camera_cfg=[{
+                        "name": "CameraFrontRGB",
+                        "Addr": "tcp://0.0.0.0:8008",
+                        "Width": 512,
+                        "Height": 384,
+                        "sim_addr": "tcp://0.0.0.0:8008",
+                    }]
+            )
+
+            self.encoder = create_configurable(
+                "config_files/async_sac_l2r/encoder.yaml", NameToSourcePath.encoder
+            )
+            self.encoder.to(DEVICE)
+
+            self.env.action_space = gym.spaces.Box(np.array([-1, -1]), np.array([1.0, 1.0]))
+            self.env = EnvContainer(self.encoder, self.env)
+
+            self.runner = create_configurable(
+                "config_files/async_sac_l2r/distribCollect_worker.yaml", NameToSourcePath.runner
+            )
+
         else:
             raise NotImplementedError
 

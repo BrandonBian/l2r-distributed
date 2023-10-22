@@ -99,9 +99,27 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # Received evaluation results from a worker
         elif isinstance(msg, EvalResultsMsg):
             print("Received:", msg.data)
-            self.server.wandb_logger.log_metric(
-                msg.data["reward"], 'reward'
-            )
+            
+            if agent_name != "l2r":
+                self.server.wandb_logger.log_metric(
+                    msg.data["reward"], 'reward'
+                )
+            else:
+                self.server.wandb_logger.log(
+                    {
+                        "reward": msg.data["reward"],
+                        "Distance": msg.data["total_distance"],
+                        "Time": msg.data["total_time"],
+                        "Num infractions": msg.data["num_infractions"],
+                        "Average Speed KPH": msg.data["average_speed_kph"],
+                        "Average Displacement Error": msg.data["average_displacement_error"],
+                        "Trajectory Efficiency": msg.data["trajectory_efficiency"],
+                        "Trajectory Admissability": msg.data["trajectory_admissibility"],
+                        "Movement Smoothness": msg.data["movement_smoothness"],
+                        "Timestep per Sec": msg.data["timestep/sec"],
+                        "Laps Completed": msg.data["laps_completed"],
+                    }
+                )
 
         # unexpected
         else:
@@ -159,6 +177,10 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         elif agent_name == "walker":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
+            )
+        elif agent_name == "l2r":
+            self.replay_buffer = create_configurable(
+                "config_files/async_sac_l2r/buffer.yaml", NameToSourcePath.buffer
             )
         else:
             raise NotImplementedError

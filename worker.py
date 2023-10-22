@@ -9,7 +9,6 @@ from distrib_l2r.asynchron.distribCollect.worker import DistribCollect_AsnycWork
 from distrib_l2r.asynchron.distribUpdate.worker import DistribUpdate_AsnycWorker
 
 if __name__ == "__main__":
-
     # Argparse for environment + training paradigm selection and wandb config
     parser = argparse.ArgumentParser()
 
@@ -25,7 +24,6 @@ if __name__ == "__main__":
         help="Select the distributed training paradigm ('dCollect', 'dUpdate')."
     )
     
-
     args = parser.parse_args()
     print(f"Worker Configured - '{args.env}'")
     print(f"Training Paradigm Configured - '{args.paradigm}'")
