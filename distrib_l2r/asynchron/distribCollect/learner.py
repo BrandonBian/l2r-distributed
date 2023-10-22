@@ -265,7 +265,6 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 self.save_fn(epoch=epoch, policy=self.get_policy_dict())
 
             epoch += 1
-            print("")
 
     def server_bind(self):
         # From https://stackoverflow.com/questions/6380057/python-binding-socket-address-already-in-use/18858817#18858817.
