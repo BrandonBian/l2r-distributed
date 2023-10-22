@@ -73,7 +73,6 @@ class DistribCollect_WorkerRunner(BaseRunner):
 
             state_encoded = next_state_encoded
         
-        info = {'metrics': {}}
         info["metrics"]["reward"] = ep_ret
         return deepcopy(self.replay_buffer), info["metrics"]
 
