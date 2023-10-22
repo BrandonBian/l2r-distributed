@@ -35,9 +35,11 @@ if __name__ == "__main__":
         learner_ip = socket.gethostbyname(f"mcar-{args.paradigm.lower()}-learner")
     elif args.env == "walker":
         learner_ip = socket.gethostbyname(f"walker-{args.paradigm.lower()}-learner")
+    elif args.env == "l2r":
+        learner_ip = socket.gethostbyname(f"l2r-{args.paradigm.lower()}-learner")
     else:
         raise NotImplementedError
-    
+
     learner_address = (learner_ip, 4444)
     
     # Configure worker (by training paradigm)

@@ -43,7 +43,6 @@ if __name__ == "__main__":
 
     if args.env == "walker":
         # https://www.gymlibrary.dev/environments/box2d/bipedal_walker/
-
         if args.paradigm == "dCollect":
             learner = DistribCollect_AsyncLearningNode(
                 agent=create_configurable(
@@ -62,9 +61,9 @@ if __name__ == "__main__":
             )
         else:
             raise NotImplementedError
+        
     elif args.env == "mcar":
         # https://mgoulao.github.io/gym-docs/environments/classic_control/mountain_car_continuous/
-
         if args.paradigm == "dCollect":
             learner = DistribCollect_AsyncLearningNode(
                 agent=create_configurable(
@@ -83,6 +82,27 @@ if __name__ == "__main__":
             )
         else:
             raise NotImplementedError
+    
+    elif args.env == "l2r":
+        if args.paradigm == "dCollect":
+            learner = DistribCollect_AsyncLearningNode(
+                agent=create_configurable(
+                    "config_files/async_sac_l2r/agent.yaml", NameToSourcePath.agent
+                ),
+                api_key=args.wandb_apikey,
+                exp_name=args.exp_name
+            )
+        elif args.paradigm == "dUpdate":
+            learner = DistribUpdate_AsyncLearningNode(
+                agent=create_configurable(
+                    "config_files/async_sac_l2r/agent.yaml", NameToSourcePath.agent
+                ),
+                api_key=args.wandb_apikey,
+                exp_name=args.exp_name
+            )
+        else:
+            raise NotImplementedError
+    
     else:
         raise NotImplementedError
 
