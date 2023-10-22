@@ -45,7 +45,6 @@ class DistribCollect_WorkerRunner(BaseRunner):
         t = 0
         done = False
         state_encoded = env.reset()
-        state_encoded = torch.Tensor(state_encoded)
 
         ep_ret = 0
         self.replay_buffer = create_configurable(
