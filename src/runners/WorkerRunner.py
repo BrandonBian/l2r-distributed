@@ -57,7 +57,7 @@ class DistribCollect_WorkerRunner(BaseRunner):
             next_state_encoded, reward, done, info = env.step(
                 action_obj.action)
 
-            # print(f'info{info}')
+            print(f'info{info}')
             ep_ret += reward
 
             self.replay_buffer.store(
