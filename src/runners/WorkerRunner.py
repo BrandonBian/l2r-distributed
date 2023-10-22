@@ -58,9 +58,6 @@ class DistribCollect_WorkerRunner(BaseRunner):
                 action_obj.action)
 
             # print(f'info{info}')
-            next_state_encoded = torch.Tensor(next_state_encoded)
-            state_encoded.to(DEVICE)
-            next_state_encoded.to(DEVICE)
             ep_ret += reward
 
             self.replay_buffer.store(
