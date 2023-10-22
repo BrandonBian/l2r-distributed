@@ -57,7 +57,6 @@ class DistribCollect_WorkerRunner(BaseRunner):
             next_state_encoded, reward, done, info = env.step(
                 action_obj.action)
 
-            print(f'info{info}')
             ep_ret += reward
 
             self.replay_buffer.store(
@@ -151,7 +150,6 @@ class DistribUpdate_WorkerRunner(BaseRunner):
 
             state_encoded = next_state_encoded
 
-        info = {'metrics': {}}
         info["metrics"]["reward"] = ep_ret
         return deepcopy(self.replay_buffer), info["metrics"]
 
