@@ -85,7 +85,7 @@ class DistribCollect_WorkerRunner(BaseRunner):
         except:
             # Non-L2R (gym)
             info["reward"] = ep_ret
-            return deepcopy(self.replay_buffer), info["reward"]
+            return deepcopy(self.replay_buffer), info
 
 @yamlize
 class DistribUpdate_WorkerRunner(BaseRunner):
@@ -167,7 +167,7 @@ class DistribUpdate_WorkerRunner(BaseRunner):
         except:
             # Non-L2R (gym)
             info["reward"] = ep_ret
-            return deepcopy(self.replay_buffer), info["reward"]
+            return deepcopy(self.replay_buffer), info
 
     def train(self, agent_params, batches):
         start = time.time()
