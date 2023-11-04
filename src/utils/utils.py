@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 def find_envvar_patterns(self, config, key):
-    pattern = re.compile(".*?\${(\w+)}.*?")
+    pattern = re.compile(".*?${(\w+)}.*?")
     try:
         envvars = re.findall(pattern, config[key])
     except:
