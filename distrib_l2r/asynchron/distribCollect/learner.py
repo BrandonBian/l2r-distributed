@@ -81,7 +81,7 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     """Request handler thread created for every request"""
 
-    def handle(self, env_name) -> None:
+    def handle(self) -> None:
         """ReplayBuffers are not thread safe - pass data via thread-safe queues"""
         msg = receive_data(self.request)
 
@@ -100,11 +100,8 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         elif isinstance(msg, EvalResultsMsg):
             print("EvalResultsMsg: Eval Reward =", msg.data["reward"])
             
-            if env_name != "l2r":
-                self.server.wandb_logger.log_metric(
-                    msg.data["reward"], 'reward'
-                )
-            else:
+            try:
+                # L2R
                 self.server.wandb_logger.log(
                     {
                         "Reward": msg.data["reward"],
@@ -119,6 +116,11 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                         "Timestep per Sec": msg.data["timestep/sec"],
                         "Laps Completed": msg.data["laps_completed"],
                     }
+                )
+            except:
+                # Non-l2r (Gym)
+                self.server.wandb_logger.log_metric(
+                    msg.data["reward"], 'reward'
                 )
 
         # unexpected
