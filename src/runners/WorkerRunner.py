@@ -57,6 +57,10 @@ class DistribCollect_WorkerRunner(BaseRunner):
             action_obj = self.agent.select_action(state_encoded)
             next_state_encoded, reward, done, info = env.step(
                 action_obj.action)
+            
+            next_state_encoded = torch.Tensor(next_state_encoded)
+            state_encoded.to(DEVICE)
+            next_state_encoded.to(DEVICE)
 
             ep_ret += reward
 
