@@ -12,6 +12,11 @@ environment/
 docs/build/*
 .vscode
 
+# Newly created kubectl yaml files
+kubernetes/mcar-sequential.yaml
+kubernetes/walker-sequential.yaml
+kubernetes/l2r-sequential.yaml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
