@@ -5,11 +5,11 @@ import argparse
 
 # Training Paradigm - Distributed Collection (DistribCollect)
 from distrib_l2r.asynchron.distribCollect.learner import DistribCollect_AsyncLearningNode
+
 # Training Paradigm - Distributed Update (DistribUpdate)
 from distrib_l2r.asynchron.distribUpdate.learner import DistribUpdate_AsyncLearningNode
 
 if __name__ == "__main__":
-
     # Argparse for environment + training paradigm selection and wandb config
     parser = argparse.ArgumentParser()
 
@@ -49,7 +49,8 @@ if __name__ == "__main__":
                     "config_files/async_sac_walker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
-                exp_name=args.exp_name
+                exp_name=args.exp_name,
+                env_name=args.env
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
@@ -57,7 +58,8 @@ if __name__ == "__main__":
                     "config_files/async_sac_walker/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
-                exp_name=args.exp_name
+                exp_name=args.exp_name,
+                env_name=args.env
             )
         else:
             raise NotImplementedError
@@ -70,7 +72,8 @@ if __name__ == "__main__":
                     "config_files/async_sac_mcar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
-                exp_name=args.exp_name
+                exp_name=args.exp_name,
+                env_name=args.env
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
@@ -78,7 +81,8 @@ if __name__ == "__main__":
                     "config_files/async_sac_mcar/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
-                exp_name=args.exp_name
+                exp_name=args.exp_name,
+                env_name=args.env
             )
         else:
             raise NotImplementedError
@@ -90,7 +94,8 @@ if __name__ == "__main__":
                     "config_files/async_sac_l2r/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
-                exp_name=args.exp_name
+                exp_name=args.exp_name,
+                env_name=args.env
             )
         elif args.paradigm == "dUpdate":
             learner = DistribUpdate_AsyncLearningNode(
@@ -98,7 +103,8 @@ if __name__ == "__main__":
                     "config_files/async_sac_l2r/agent.yaml", NameToSourcePath.agent
                 ),
                 api_key=args.wandb_apikey,
-                exp_name=args.exp_name
+                exp_name=args.exp_name,
+                env_name=args.env
             )
         else:
             raise NotImplementedError

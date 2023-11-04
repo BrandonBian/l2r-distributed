@@ -25,7 +25,6 @@ from distrib_l2r.utils import receive_data
 from distrib_l2r.utils import send_data
 
 logging.getLogger('').setLevel(logging.INFO)
-agent_name = os.getenv("AGENT_NAME")
 
 # https://stackoverflow.com/questions/41653281/sockets-with-threadpool-server-python
 
@@ -82,7 +81,7 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     """Request handler thread created for every request"""
 
-    def handle(self) -> None:
+    def handle(self, env_name) -> None:
         """ReplayBuffers are not thread safe - pass data via thread-safe queues"""
         msg = receive_data(self.request)
 
@@ -101,7 +100,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         elif isinstance(msg, EvalResultsMsg):
             print("EvalResultsMsg: Eval Reward =", msg.data["reward"])
             
-            if agent_name != "l2r":
+            if env_name != "l2r":
                 self.server.wandb_logger.log_metric(
                     msg.data["reward"], 'reward'
                 )
@@ -160,6 +159,7 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             save_freq: Optional[int] = None,
             api_key: str = "",
             exp_name: str = "Unknown Distributed Run",
+            env_name: Optional[str] = None,
     ) -> None:
         self.numThreads = 5  # Hardcode for now
         super().__init__(server_address, ThreadedTCPRequestHandler)
@@ -171,15 +171,15 @@ class DistribCollect_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
 
         # Create a replay buffer
         self.buffer_size = buffer_size
-        if agent_name == "mcar":
+        if env_name == "mcar":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_mcar/buffer.yaml", NameToSourcePath.buffer
             )
-        elif agent_name == "walker":
+        elif env_name == "walker":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
             )
-        elif agent_name == "l2r":
+        elif env_name == "l2r":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_l2r/buffer.yaml", NameToSourcePath.buffer
             )

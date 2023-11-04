@@ -42,9 +42,9 @@ if __name__ == "__main__":
     
     # Configure worker (by training paradigm)
     if args.paradigm == "dCollect":
-        worker = DistribCollect_AsnycWorker(learner_address=learner_address)
+        worker = DistribCollect_AsnycWorker(learner_address=learner_address, env_name=args.env)
     elif args.paradigm == "dUpdate":
-        worker = DistribUpdate_AsnycWorker(learner_address=learner_address)
+        worker = DistribUpdate_AsnycWorker(learner_address=learner_address, env_name=args.env)
     else:
         raise NotImplementedError
 

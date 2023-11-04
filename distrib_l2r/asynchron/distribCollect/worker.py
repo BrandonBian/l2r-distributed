@@ -28,39 +28,32 @@ from l2r import build_env
 
 logging.getLogger('').setLevel(logging.INFO)
 
-# pip install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment
-# from l2r import build_env
-# from l2r import RacingEnv
-
-agent_name = os.getenv("AGENT_NAME")
-
-
 class DistribCollect_AsnycWorker:
     """An asynchronous worker"""
-
     def __init__(
             self,
             learner_address: Tuple[str, int],
             buffer_size: int = 5000,
             env_wrapper: Optional[Wrapper] = None,
+            env_name: Optional[str] = None,
             **kwargs,
     ) -> None:
-
         self.learner_address = learner_address
         self.buffer_size = buffer_size
         self.mean_reward = 0.0
 
-        if agent_name == "mcar":
+        # Build the environment and runner
+        if env_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
                 "config_files/async_sac_mcar/distribCollect_worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "walker":
+        elif env_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
                 "config_files/async_sac_walker/distribCollect_worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "l2r":
+        elif env_name == "l2r":
             self.env = build_env(
                 controller_kwargs={"quiet": True},
                 env_kwargs=
