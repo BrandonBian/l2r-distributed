@@ -78,8 +78,14 @@ class DistribCollect_WorkerRunner(BaseRunner):
 
             state_encoded = next_state_encoded
         
-        info["metrics"]["reward"] = ep_ret
-        return deepcopy(self.replay_buffer), info["metrics"]
+        try:
+            # L2R
+            info["metrics"]["reward"] = ep_ret
+            return deepcopy(self.replay_buffer), info["metrics"]
+        except:
+            # Non-L2R (gym)
+            info["reward"] = ep_ret
+            return deepcopy(self.replay_buffer), info["reward"]
 
 @yamlize
 class DistribUpdate_WorkerRunner(BaseRunner):
@@ -154,8 +160,14 @@ class DistribUpdate_WorkerRunner(BaseRunner):
 
             state_encoded = next_state_encoded
 
-        info["metrics"]["reward"] = ep_ret
-        return deepcopy(self.replay_buffer), info["metrics"]
+        try:
+            # L2R
+            info["metrics"]["reward"] = ep_ret
+            return deepcopy(self.replay_buffer), info["metrics"]
+        except:
+            # Non-L2R (gym)
+            info["reward"] = ep_ret
+            return deepcopy(self.replay_buffer), info["reward"]
 
     def train(self, agent_params, batches):
         start = time.time()
