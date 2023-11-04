@@ -36,9 +36,7 @@ spec:
           command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
             - /bin/bash
             - -c
-            - export AGENT_NAME=mcar &&
-              export TRAINING_PARADIGM=distribUpdate &&
-              apt-get update &&
+            - apt-get update &&
               apt-get install xvfb swig -y &&
               pip3 install tianshou gym strictyaml line_profiler &&
               git clone https://github.com/BrandonBian/l2r-distributed.git &&
@@ -69,9 +67,7 @@ spec:
       command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
         - /bin/bash
         - -c
-        - export AGENT_NAME=mcar &&
-          export TRAINING_PARADIGM=distribUpdate &&
-          pip3 install tianshou gym strictyaml wandb line_profiler &&
+        - pip3 install tianshou gym strictyaml wandb line_profiler &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd "$(\ls -1dt ./*/ | head -n 1)" &&
           pip3 install gym[box2d] protobuf==3.20.* &&

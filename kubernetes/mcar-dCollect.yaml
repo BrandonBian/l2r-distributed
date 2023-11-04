@@ -6,7 +6,7 @@ metadata:
     tier: mcar-dcollect-workers
 spec:
   # 2 to start, then for phortx 30-40 is the upper bound probably
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       tier: mcar-dcollect-workers
@@ -36,11 +36,10 @@ spec:
           command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
             - /bin/bash
             - -c
-            - export AGENT_NAME=mcar &&
-              export TRAINING_PARADIGM=distribCollect &&
-              apt-get update &&
+            - apt-get update &&
               apt-get install xvfb swig -y &&
               pip3 install tianshou gym strictyaml line_profiler &&
+              pip3 install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment tianshou gym strictyaml wandb tensorboardX jsonpickle &&
               git clone https://github.com/BrandonBian/l2r-distributed.git &&
               cd "$(\ls -1dt ./*/ | head -n 1)" &&
               pip3 install -r setup/devtools_reqs.txt &&
@@ -69,9 +68,7 @@ spec:
       command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
         - /bin/bash
         - -c
-        - export AGENT_NAME=mcar &&
-          export TRAINING_PARADIGM=dCollect &&
-          pip3 install tianshou gym strictyaml wandb line_profiler &&
+        - pip3 install tianshou gym strictyaml wandb line_profiler &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd "$(\ls -1dt ./*/ | head -n 1)" &&
           pip3 install gym[box2d] protobuf==3.20.* &&
