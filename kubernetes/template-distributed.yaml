@@ -39,7 +39,7 @@ spec:
             - apt-get update &&
               apt-get install xvfb swig -y &&
               pip3 install tianshou gym strictyaml line_profiler &&
-              pip3 install git+https://github.com/learn-to-race/l2r.git@aicrowd-environmentd &&
+              pip3 install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment &&
               git clone https://github.com/BrandonBian/l2r-distributed.git &&
               cd l2r-distributed &&
               pip3 install -r setup/devtools_reqs.txt &&
