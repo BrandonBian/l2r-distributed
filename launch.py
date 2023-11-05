@@ -25,8 +25,15 @@ assert training_paradigm in ("sequential", "dCollect", "dUpdate")
 # Fetch the corresponding source file
 if training_paradigm == "sequential":
     source_file = "./kubernetes/template-sequential.yaml"
+
+    with open(source_file, "r") as file:
+        data = yaml.safe_load(file)
 else:
     source_file = "./kubernetes/template-distributed.yaml"
+
+    # NOTE: for distributed YAML, there are multiple sections
+    stream = open(source_file, "r")
+    data = yaml.load_all(stream, yaml.FullLoader)
 
 #############################
 # - Output Configurations - #
@@ -35,8 +42,6 @@ print("----------")
 print(f"RL Environment = [{RL_env}] | Training Paradigm = [{training_paradigm}] | Number of Workers = [{num_workers}] | Experiment Name = [{exp_name}] ---")
 print("----------")
 
-with open(source_file, "r") as file:
-    data = yaml.safe_load(file)
 
 ######################################
 # - Configure Template: Sequential - #
@@ -63,12 +68,76 @@ if training_paradigm == "sequential":
     command += "--wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a "
     command += f"--exp_name {exp_name}"
     
+    assert "TODO" not in str(command)
     data["spec"]["containers"][0]["command"][2] = command
 
+#######################################
+# - Configure Template: Distributed - #
+#######################################
+else:
+    updated_yaml = []
+
+    for idx, section in enumerate(data):
+        if idx == 0:
+            ##########################
+            # ReplicaSet for workers #
+            ##########################
+
+            # Configure names
+            worker_name = f"{RL_env}-{training_paradigm.lower()}-workers"
+
+            section["metadata"]["name"] = worker_name
+            section["metadata"]["labels"]["tier"] = worker_name
+            section["spec"]["replicas"] = num_workers
+            section["spec"]["selector"]["matchLabels"]["tier"] = worker_name
+            section["spec"]["template"]["metadata"]["labels"]["tier"] = worker_name
+            section["spec"]["template"]["spec"]["containers"][0]["name"] = worker_name
+
+            # Configure command
+            command = section["spec"]["template"]["spec"]["containers"][0]["command"][2]
+            
+            # TODO: for l2r we need additional installations
+            command += f" python3 worker.py --env {RL_env} --paradigm {training_paradigm}"
+            
+            section["spec"]["template"]["spec"]["containers"][0]["command"][2] = command
+
+        elif idx == 1:
+            ###################
+            # Pod for learner #
+            ###################
+
+            # Configure names
+            learner_name = f"{RL_env}-{training_paradigm.lower()}-learner"
+            port_name = f"{RL_env}-{training_paradigm.lower()}"
+
+            section["metadata"]["name"] = learner_name
+            section["spec"]["containers"][0]["name"] = learner_name
+            section["spec"]["containers"][0]["ports"][0]["name"] = port_name
+
+            # Configure command
+            command = section["spec"]["containers"][0]["command"][2]
+
+            # TODO: add for l2r
+            command += f" python3 server.py --env {RL_env} --paradigm {training_paradigm} --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name {exp_name}"
+
+            section["spec"]["containers"][0]["command"][2] = command
+        else:
+            ############################################
+            # Service for worker-learner communication #
+            ############################################
+            section["metadata"]["name"] = f"{RL_env}-{training_paradigm.lower()}-learner"
+            section["spec"]["ports"][0]["name"] = f"{RL_env}-{training_paradigm.lower()}"
+            section["spec"]["ports"][0]["targetPort"] = f"{RL_env}-{training_paradigm.lower()}"
+
+        assert "TODO" not in str(section)
+        updated_yaml.append(section)
 
 # Save the newly created kubernetes file
 with open(f"./kubernetes/{RL_env}-{training_paradigm}.yaml", "w") as file:
-    yaml.dump(data, file)
- 
+    if training_paradigm == "sequential":
+        yaml.dump(data, file)
+    else:
+        yaml.safe_dump_all(updated_yaml, file, default_flow_style=False)
+
 # Launch Kubernetes source file
 subprocess.run(["kubectl", "create", "-f", f"./kubernetes/{RL_env}-{training_paradigm}.yaml"], check=True)
