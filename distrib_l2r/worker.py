@@ -27,6 +27,8 @@ from distrib_l2r.utils import send_data
 from src.constants import Task
 from l2r import build_env
 
+logging.getLogger('').setLevel(logging.INFO)
+
 class AsnycWorker:
     """An asynchronous worker"""
     def __init__(
@@ -197,8 +199,7 @@ class AsnycWorker:
 
                 is_train = response.data["is_train"]
                 policy_id, policy = response.data["policy_id"], response.data["policy"]
-
-                print("")
+                
                 counter += 1
         else:
             raise NotImplementedError
