@@ -104,7 +104,7 @@ class WorkerRunner(BaseRunner):
 
     def train(self, agent_params, batches):
         # Only dUpdate paradigm has training tasks allocated to workers
-        assert self.paradigm == "dCollect"
+        assert self.paradigm == "dUpdate"
 
         start = time.time()
         self.agent.load_model(agent_params)
