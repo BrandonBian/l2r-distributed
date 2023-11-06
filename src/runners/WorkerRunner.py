@@ -51,7 +51,7 @@ class WorkerRunner(BaseRunner):
         t = 0
         done = False
         state_encoded = env.reset()
-        state_encoded = torch.Tensor(state_encoded)
+        state_encoded = torch.tensor(state_encoded)
 
         ep_ret = 0
         self.replay_buffer = create_configurable(
@@ -73,7 +73,7 @@ class WorkerRunner(BaseRunner):
             next_state_encoded, reward, done, info = env.step(
                 action_obj.action)
             
-            next_state_encoded = torch.Tensor(next_state_encoded)
+            next_state_encoded = torch.tensor(next_state_encoded)
             state_encoded.to(DEVICE)
             next_state_encoded.to(DEVICE)
 
