@@ -28,7 +28,6 @@ from distrib_l2r.utils import send_data
 from src.constants import Task
 
 logging.getLogger('').setLevel(logging.INFO)
-agent_name = os.getenv("AGENT_NAME")
 
 # https://stackoverflow.com/questions/41653281/sockets-with-threadpool-server-python
 
@@ -111,9 +110,29 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             reward = msg.data["reward"]
             logging.info(
                 f"<<< Learner Receiving: [Reward] | Reward = {reward}")
-            self.server.wandb_logger.log_metric(
-                reward, 'reward'
-            )
+            
+            try:
+                # L2R
+                self.server.wandb_logger.log(
+                    {
+                        "Reward": msg.data["reward"],
+                        "Distance": msg.data["total_distance"],
+                        "Time": msg.data["total_time"],
+                        "Num infractions": msg.data["num_infractions"],
+                        "Average Speed KPH": msg.data["average_speed_kph"],
+                        "Average Displacement Error": msg.data["average_displacement_error"],
+                        "Trajectory Efficiency": msg.data["trajectory_efficiency"],
+                        "Trajectory Admissability": msg.data["trajectory_admissibility"],
+                        "Movement Smoothness": msg.data["movement_smoothness"],
+                        "Timestep per Sec": msg.data["timestep/sec"],
+                        "Laps Completed": msg.data["laps_completed"],
+                    }
+                )
+            except:
+                # Non-l2r (Gym)
+                self.server.wandb_logger.log_metric(
+                    msg.data["reward"], 'reward'
+                )
 
         # Received trained parameters from a worker
         # Update current parameter with damping factors - TODO
@@ -175,7 +194,8 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             save_func: Optional[Callable] = None,
             save_freq: Optional[int] = None,
             api_key: str = "",
-            exp_name: str = "Undefined Distributed Run"
+            exp_name: str = "Undefined Distributed Run",
+            env_name: Optional[str] = None,
     ) -> None:
         self.numThreads = 5  # Hardcode for now
         super().__init__(server_address, ThreadedTCPRequestHandler)
@@ -186,11 +206,11 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
 
         # Create a replay buffer
         self.buffer_size = buffer_size
-        if agent_name == "mcar":
+        if env_name == "mcar":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_mcar/buffer.yaml", NameToSourcePath.buffer
             )
-        elif agent_name == "walker":
+        elif env_name == "walker":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
             )
@@ -285,28 +305,6 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 self.replay_buffer.store(semibuffer)
             
             time.sleep(0.5)
-
-        # epoch = 0
-        # while True:
-
-
-            # start = time.time()
-            # # Learning steps for the policy
-            # for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
-            #     batch = self.replay_buffer.sample_batch()
-            #     self.agent.update(data=batch)
-
-            # # Update policy without blocking
-            # self.update_agent()
-            # duration = time.time() - start
-            # if TIMING:
-            #     print(f"Update time = {duration}")
-
-            # Optionally save
-            # if self.save_func and epoch % self.save_every == 0:
-            #     self.save_fn(epoch=epoch, policy=self.get_policy_dict())
-
-            # epoch += 1
 
     def server_bind(self):
         # From https://stackoverflow.com/questions/6380057/python-binding-socket-address-already-in-use/18858817#18858817.
