@@ -123,7 +123,7 @@ class DistribUpdate_WorkerRunner(BaseRunner):
         self.agent.load_model(agent_params)
         t = 0
         done = False
-        state_encoded, info = env.reset()
+        state_encoded = env.reset()
         state_encoded = torch.Tensor(state_encoded)
 
         ep_ret = 0
