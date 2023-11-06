@@ -203,6 +203,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.batch_size = batch_size
         self.epochs = epochs
         self.eval_prob = eval_prob
+        self.paradigm = paradigm
 
         # Create a replay buffer
         self.buffer_size = buffer_size
