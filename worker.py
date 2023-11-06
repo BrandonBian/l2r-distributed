@@ -2,11 +2,7 @@ import socket
 import os
 import argparse
 
-# Training Paradigm - Distributed Collection (DistribCollect)
-from distrib_l2r.asynchron.distribCollect.worker import DistribCollect_AsnycWorker
-
-# Training Paradigm - Distributed Update (DistribUpdate)
-from distrib_l2r.asynchron.distribUpdate.worker import DistribUpdate_AsnycWorker
+from distrib_l2r.worker import AsnycWorker
 
 if __name__ == "__main__":
     # Argparse for environment + training paradigm selection and wandb config
@@ -33,11 +29,6 @@ if __name__ == "__main__":
     learner_address = (learner_ip, 4444)
     
     # Configure worker (by training paradigm)
-    if args.paradigm == "dCollect":
-        worker = DistribCollect_AsnycWorker(learner_address=learner_address, env_name=args.env)
-    elif args.paradigm == "dUpdate":
-        worker = DistribUpdate_AsnycWorker(learner_address=learner_address, env_name=args.env)
-    else:
-        raise NotImplementedError
+    worker = AsnycWorker(learner_address=learner_address, env_name=args.env, paradigm=args.paradigm)
 
     worker.work()
