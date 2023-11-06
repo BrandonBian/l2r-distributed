@@ -1,4 +1,4 @@
-name: DistribUpdate_WorkerRunner
+name: WorkerRunner
 config:
   agent_config_path: "config_files/async_sac_l2r/agent.yaml"
   buffer_config_path: "config_files/async_sac_l2r/buffer.yaml"
