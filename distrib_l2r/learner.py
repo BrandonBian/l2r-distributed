@@ -62,7 +62,6 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
         # server main loop
         while True:
             self.handle_request()
-        self.server_close()
 
     def process_request_thread(self):
         '''
@@ -167,7 +166,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                   sock=self.request)
 
 
-class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
+class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
     """A multi-threaded, offline, off-policy reinforcement learning server
 
     Args:
@@ -190,11 +189,12 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             epochs: int = 500,  # Originally 500
             buffer_size: int = 1_000_000,  # Originally 1M
             server_address: Tuple[str, int] = ("0.0.0.0", 4444),
+            eval_prob: float = 0.20,
             save_func: Optional[Callable] = None,
-            save_freq: Optional[int] = None,
             api_key: str = "",
             exp_name: str = "Undefined Distributed Run",
             env_name: Optional[str] = None,
+            paradigm: Optional[str] = None
     ) -> None:
         self.numThreads = 5  # Hardcode for now
         super().__init__(server_address, ThreadedTCPRequestHandler)
@@ -202,6 +202,7 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.update_steps = update_steps
         self.batch_size = batch_size
         self.epochs = epochs
+        self.eval_prob = eval_prob
 
         # Create a replay buffer
         self.buffer_size = buffer_size
@@ -212,6 +213,10 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         elif env_name == "walker":
             self.replay_buffer = create_configurable(
                 "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
+            )
+        elif env_name == "l2r":
+            self.replay_buffer = create_configurable(
+                "config_files/async_sac_l2r/buffer.yaml", NameToSourcePath.buffer
             )
         else:
             raise NotImplementedError
@@ -246,37 +251,47 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 # non-blocking
                 pass
 
-        start = time.time()
-        task = self.select_task()
-
-        if task == Task.TRAIN:
-            buffers_to_send = []
-
-            for _ in range(SEND_BATCH):
-                batch = self.replay_buffer.sample_batch()
-                buffers_to_send.append(batch)
-
-            msg = {
+        if self.paradigm == "dCollect":
+            return {
                 "policy_id": self.agent_id,
                 "policy": self.updated_agent,
-                "replay_buffer": buffers_to_send,
-                "task": task
+                "is_train": random.random() >= self.eval_prob,
             }
+
+        elif self.paradigm == "dUpdate":
+            start = time.time()
+            task = self.select_task()
+
+            if task == Task.TRAIN:
+                buffers_to_send = []
+
+                for _ in range(SEND_BATCH):
+                    batch = self.replay_buffer.sample_batch()
+                    buffers_to_send.append(batch)
+
+                msg = {
+                    "policy_id": self.agent_id,
+                    "policy": self.updated_agent,
+                    "replay_buffer": buffers_to_send,
+                    "task": task
+                }
+            else:
+                msg = {
+                    "policy_id": self.agent_id,
+                    "policy": self.updated_agent,
+                    "task": task
+                }
+
+            duration = time.time() - start
+            if TIMING:
+                print(f"Preparation Time = {duration} s")
+
+            logging.info(
+                f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
+            return msg
         else:
-            msg = {
-                "policy_id": self.agent_id,
-                "policy": self.updated_agent,
-                "task": task
-            }
-
-        duration = time.time() - start
-        if TIMING:
-            print(f"Preparation Time = {duration} s")
-
-        logging.info(
-            f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
-        return msg
-
+            raise NotImplementedError
+    
     def update_agent(self) -> None:
         """Update policy that will be sent to workers without blocking"""
         if not self.agent_queue.empty():
@@ -287,23 +302,57 @@ class DistribUpdate_AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 pass
         self.agent_queue.put({k: v.cpu()
                              for k, v in self.agent.state_dict().items()})
-
         self.agent_id += 1
+    
 
     def learn(self) -> None:
         """The thread where thread-safe gradient updates occur"""
-        while True:
-            # Sample data from buffer_queue, and put inside replay buffer
-            if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
-                semibuffer = self.buffer_queue.get()
+        if self.paradigm == "dCollect":
+            epoch = 0
+            while True:
+                if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
+                    semibuffer = self.buffer_queue.get()
 
-                logging.info(
-                    f"--- Learner Processing: Sampled Buffer = {len(semibuffer)} | Replay Buffer = {len(self.replay_buffer)} | Buffer Queue = {self.buffer_queue.qsize()}")
+                    logging.info(f" --- Epoch {epoch} ---")
+                    logging.info(f" Samples received = {len(semibuffer)}")
+                    logging.info(
+                        f" Replay buffer size = {len(self.replay_buffer)}")
+                    logging.info(
+                        f" Buffers to be processed = {self.buffer_queue.qsize()}")
 
-                # Add new data to the primary replay buffer
-                self.replay_buffer.store(semibuffer)
-            
-            time.sleep(0.5)
+                    # Add new data to the primary replay buffer
+                    self.replay_buffer.store(semibuffer)
+
+                # Learning steps for the policy
+                for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
+                    batch = self.replay_buffer.sample_batch()
+                    self.agent.update(data=batch)
+                    # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
+
+                # Update policy without blocking
+                self.update_agent()
+
+                # Optionally save
+                if self.save_func and epoch % self.save_every == 0:
+                    self.save_fn(epoch=epoch, policy=self.get_policy_dict())
+
+                epoch += 1
+
+        elif self.paradigm == "dUpdate":
+            while True:
+                # Sample data from buffer_queue, and put inside replay buffer
+                if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
+                    semibuffer = self.buffer_queue.get()
+
+                    logging.info(
+                        f"--- Learner Processing: Sampled Buffer = {len(semibuffer)} | Replay Buffer = {len(self.replay_buffer)} | Buffer Queue = {self.buffer_queue.qsize()}")
+
+                    # Add new data to the primary replay buffer
+                    self.replay_buffer.store(semibuffer)
+                
+                time.sleep(0.5)
+        else:
+            raise NotImplementedError
 
     def server_bind(self):
         # From https://stackoverflow.com/questions/6380057/python-binding-socket-address-already-in-use/18858817#18858817.

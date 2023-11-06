@@ -3,11 +3,7 @@ import threading
 import sys
 import argparse
 
-# Training Paradigm - Distributed Collection (DistribCollect)
-from distrib_l2r.asynchron.distribCollect.learner import DistribCollect_AsyncLearningNode
-
-# Training Paradigm - Distributed Update (DistribUpdate)
-from distrib_l2r.asynchron.distribUpdate.learner import DistribUpdate_AsyncLearningNode
+from distrib_l2r.learner import AsyncLearningNode
 
 if __name__ == "__main__":
     # Argparse for environment + training paradigm selection and wandb config
@@ -41,76 +37,18 @@ if __name__ == "__main__":
     print(f"Server Configured - '{args.env}'")
     print(f"Training Paradigm Configured - '{args.paradigm}'")
 
-    if args.env == "walker":
-        # https://www.gymlibrary.dev/environments/box2d/bipedal_walker/
-        if args.paradigm == "dCollect":
-            learner = DistribCollect_AsyncLearningNode(
-                agent=create_configurable(
-                    "config_files/async_sac_walker/agent.yaml", NameToSourcePath.agent
-                ),
-                api_key=args.wandb_apikey,
-                exp_name=args.exp_name,
-                env_name=args.env
-            )
-        elif args.paradigm == "dUpdate":
-            learner = DistribUpdate_AsyncLearningNode(
-                agent=create_configurable(
-                    "config_files/async_sac_walker/agent.yaml", NameToSourcePath.agent
-                ),
-                api_key=args.wandb_apikey,
-                exp_name=args.exp_name,
-                env_name=args.env
-            )
-        else:
-            raise NotImplementedError
-        
-    elif args.env == "mcar":
-        # https://mgoulao.github.io/gym-docs/environments/classic_control/mountain_car_continuous/
-        if args.paradigm == "dCollect":
-            learner = DistribCollect_AsyncLearningNode(
-                agent=create_configurable(
-                    "config_files/async_sac_mcar/agent.yaml", NameToSourcePath.agent
-                ),
-                api_key=args.wandb_apikey,
-                exp_name=args.exp_name,
-                env_name=args.env
-            )
-        elif args.paradigm == "dUpdate":
-            learner = DistribUpdate_AsyncLearningNode(
-                agent=create_configurable(
-                    "config_files/async_sac_mcar/agent.yaml", NameToSourcePath.agent
-                ),
-                api_key=args.wandb_apikey,
-                exp_name=args.exp_name,
-                env_name=args.env
-            )
-        else:
-            raise NotImplementedError
-    
-    elif args.env == "l2r":
-        if args.paradigm == "dCollect":
-            learner = DistribCollect_AsyncLearningNode(
-                agent=create_configurable(
-                    "config_files/async_sac_l2r/agent.yaml", NameToSourcePath.agent
-                ),
-                api_key=args.wandb_apikey,
-                exp_name=args.exp_name,
-                env_name=args.env
-            )
-        elif args.paradigm == "dUpdate":
-            learner = DistribUpdate_AsyncLearningNode(
-                agent=create_configurable(
-                    "config_files/async_sac_l2r/agent.yaml", NameToSourcePath.agent
-                ),
-                api_key=args.wandb_apikey,
-                exp_name=args.exp_name,
-                env_name=args.env
-            )
-        else:
-            raise NotImplementedError
-    
-    else:
-        raise NotImplementedError
+    # NOTE: walker -> https://www.gymlibrary.dev/environments/box2d/bipedal_walker/
+    # NOTE: mcar -> https://mgoulao.github.io/gym-docs/environments/classic_control/mountain_car_continuous/
+                
+    learner = AsyncLearningNode(
+        agent=create_configurable(
+            f"config_files/async_sac_{args.env}/agent.yaml", NameToSourcePath.agent
+        ),
+        api_key=args.wandb_apikey,
+        exp_name=args.exp_name,
+        env_name=args.env,
+        paradigm=args.paradigm
+    )
 
     server_thread = threading.Thread(target=learner.serve_forever)
     server_thread.start()
