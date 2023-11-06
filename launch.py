@@ -96,7 +96,12 @@ else:
             # Configure command
             command = section["spec"]["template"]["spec"]["containers"][0]["command"][2]
             
-            # TODO: for l2r we need additional installations
+            # NOTE: for l2r we need to start Arrival Simulator
+            if RL_env == "l2r":
+                command += "sudo -u ubuntu xvfb-run --server-num 1 /workspace/LinuxNoEditor/ArrivalSim.sh -openGL & "
+                command += "sleep 600 && "
+                command += "cd / && cd workspace && cd l2r-distributed && "
+            
             command += f" python3 worker.py --env {RL_env} --paradigm {training_paradigm}"
             
             section["spec"]["template"]["spec"]["containers"][0]["command"][2] = command
@@ -117,7 +122,6 @@ else:
             # Configure command
             command = section["spec"]["containers"][0]["command"][2]
 
-            # TODO: add for l2r
             command += f" python3 server.py --env {RL_env} --paradigm {training_paradigm} --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name {exp_name}"
 
             section["spec"]["containers"][0]["command"][2] = command
