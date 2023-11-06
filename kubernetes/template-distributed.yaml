@@ -67,9 +67,14 @@ spec:
       command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
         - /bin/bash
         - -c
-        - pip3 install tianshou gym strictyaml wandb line_profiler &&
+        - apt-get update &&
+          apt-get install xvfb swig -y &&
+          pip3 install tianshou gym strictyaml line_profiler &&
+          pip3 install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
-          cd "$(\ls -1dt ./*/ | head -n 1)" &&
+          cd l2r-distributed &&
+          pip3 install -r setup/devtools_reqs.txt &&
+          pip3 install wandb tensorboardX jsonpickle &&
           pip3 install gym[box2d] protobuf==3.20.* && 
       ports:
         - name: TODO
