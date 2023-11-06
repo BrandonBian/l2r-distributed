@@ -3,7 +3,7 @@ import threading
 import sys
 import argparse
 
-from distrib_l2r.learner import AsyncLearningNode
+from distrib_l2r.async_learner import AsyncLearningNode
 
 if __name__ == "__main__":
     # Argparse for environment + training paradigm selection and wandb config

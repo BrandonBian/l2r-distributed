@@ -2,7 +2,7 @@ import socket
 import os
 import argparse
 
-from distrib_l2r.worker import AsnycWorker
+from distrib_l2r.async_worker import AsnycWorker
 
 if __name__ == "__main__":
     # Argparse for environment + training paradigm selection and wandb config
