@@ -32,9 +32,6 @@ logging.getLogger('').setLevel(logging.INFO)
 # from l2r import build_env
 # from l2r import RacingEnv
 
-agent_name = os.getenv("AGENT_NAME")
-
-
 class DistribUpdate_AsnycWorker:
     """An asynchronous worker"""
 
@@ -43,6 +40,7 @@ class DistribUpdate_AsnycWorker:
             learner_address: Tuple[str, int],
             buffer_size: int = 5000,
             env_wrapper: Optional[Wrapper] = None,
+            env_name: Optional[str] = None,
             **kwargs,
     ) -> None:
 
@@ -96,17 +94,17 @@ class DistribUpdate_AsnycWorker:
         self.env = EnvContainer(self.encoder, self.env)
         """
 
-        if agent_name == "mcar":
+        if env_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
                 "config_files/async_sac_mcar/distribUpdate_worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "walker":
+        elif env_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
                 "config_files/async_sac_walker/distribUpdate_worker.yaml", NameToSourcePath.runner
             )
-        elif agent_name == "l2r":
+        elif env_name == "l2r":
             raise NotImplementedError
 
     def work(self) -> None:
