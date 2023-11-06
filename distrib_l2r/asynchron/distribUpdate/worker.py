@@ -97,12 +97,12 @@ class DistribUpdate_AsnycWorker:
         if env_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
-                "config_files/async_sac_mcar/distribUpdate_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_mcar/worker.yaml", NameToSourcePath.runner
             )
         elif env_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
-                "config_files/async_sac_walker/distribUpdate_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_walker/worker.yaml", NameToSourcePath.runner
             )
         elif env_name == "l2r":
             raise NotImplementedError
@@ -167,7 +167,7 @@ class DistribUpdate_AsnycWorker:
             self, policy_weights: dict, task: Task
     ) -> Tuple[ReplayBuffer, Any]:
         """ Collect 1 episode of data (replay buffer OR reward) in the environment """
-        buffer, result = self.runner.run(self.env, policy_weights, task)
+        buffer, result = self.runner.run(self.env, policy_weights, task=task)
         return buffer, result
 
     def train(self, policy_weights: dict, batches: list):

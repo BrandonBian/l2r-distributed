@@ -46,12 +46,12 @@ class DistribCollect_AsnycWorker:
         if env_name == "mcar":
             self.env = gym.make("MountainCarContinuous-v0")
             self.runner = create_configurable(
-                "config_files/async_sac_mcar/distribCollect_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_mcar/worker.yaml", NameToSourcePath.runner
             )
         elif env_name == "walker":
             self.env = gym.make("BipedalWalker-v3")
             self.runner = create_configurable(
-                "config_files/async_sac_walker/distribCollect_worker.yaml", NameToSourcePath.runner
+                "config_files/async_sac_walker/worker.yaml", NameToSourcePath.runner
             )
         elif env_name == "l2r":
             self.env = build_env(
@@ -156,6 +156,6 @@ class DistribCollect_AsnycWorker:
     ) -> Tuple[ReplayBuffer, Any]:
         """Collect 1 episode of data in the environment"""
 
-        buffer, result = self.runner.run(self.env, policy_weights, is_train)
+        buffer, result = self.runner.run(self.env, policy_weights, is_train=is_train)
 
         return buffer, result
