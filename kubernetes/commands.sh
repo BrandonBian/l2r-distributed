@@ -15,7 +15,7 @@ conda install -c conda-forge mamba -y
 # Create l2r environment using mamba
 mamba create --name l2r python=3.8 -y
 mamba init
-bash
+exec $SHELL
 mamba activate l2r
 
 # Install necessary packages
