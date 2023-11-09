@@ -1,5 +1,4 @@
 #!/bin/bash
-mamba activate l2r
 
 # Install necessary packages
 mamba install git -y
