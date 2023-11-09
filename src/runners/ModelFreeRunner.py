@@ -1,7 +1,6 @@
 """Generalized runner for single-process RL. Takes in encoded observations, applies them to a buffer, and trains."""
 import json
 import time
-from matplotlib.font_manager import json_dump
 import numpy as np
 import wandb
 from src.loggers.WanDBLogger import WanDBLogger
