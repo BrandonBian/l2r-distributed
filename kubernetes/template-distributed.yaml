@@ -32,19 +32,24 @@ spec:
               value: "0"
             - name: CUDA_VISIBLE_DEVICES
               value: "0"
-          image: docker.pdl.cmu.edu/l2r2022:latest
+          image: docker.pdl.cmu.edu/jingyua4/safepo:v1
           command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
             - /bin/bash
             - -c
-            - apt-get update &&
-              apt-get install xvfb swig -y &&
-              pip3 install tianshou gym strictyaml line_profiler &&
-              pip3 install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment &&
+            - cd / &&
+              sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys A4B469963BF863CC &&
+              sudo apt-get update &&
+              sudo apt-get install -y python3.8 python3.8-dev python3.8-distutils python3.8-venv swig &&
+              wget https://bootstrap.pypa.io/get-pip.py &&
+              sudo python3.8 get-pip.py &&
+              apt install -y git &&
               git clone https://github.com/BrandonBian/l2r-distributed.git &&
               cd l2r-distributed &&
-              pip3 install -r setup/devtools_reqs.txt &&
-              pip3 install wandb tensorboardX jsonpickle &&
-              pip3 install gym[box2d] protobuf==3.20.* && 
+              pip install --upgrade pip setuptools wheel &&
+              pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment &&
+              pip install -r setup/devtools_reqs.txt &&
+              pip install "opencv-python-headless<4.3" gym[box2d] protobuf==3.20.* && 
+              pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113 && 
 ---
 apiVersion: v1
 kind: Pod
@@ -63,19 +68,25 @@ spec:
       resources: # Maybe a good idea to have the learner on its own gpu, specify like below
         limits:
           nvidia.com/gpu: 1
-      image: docker.pdl.cmu.edu/l2r2022:latest # Slightly different image or files or git repo
+      image: docker.pdl.cmu.edu/jingyua4/safepo:v1 # Slightly different image or files or git repo
       command: # remember to configure 'AGENT_NAME' and 'TRAINING_PARADIGM'
         - /bin/bash
         - -c
-        - apt-get update &&
-          apt-get install xvfb swig -y &&
-          pip3 install tianshou gym strictyaml line_profiler &&
-          pip3 install git+https://github.com/learn-to-race/l2r.git@aicrowd-environment &&
+        - cd / &&
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys A4B469963BF863CC &&
+          sudo apt-get update &&
+          sudo apt-get install -y python3.8 python3.8-dev python3.8-distutils python3.8-venv swig &&
+          wget https://bootstrap.pypa.io/get-pip.py &&
+          sudo python3.8 get-pip.py &&
+          apt install -y git &&
           git clone https://github.com/BrandonBian/l2r-distributed.git &&
           cd l2r-distributed &&
-          pip3 install -r setup/devtools_reqs.txt &&
-          pip3 install wandb tensorboardX jsonpickle &&
-          pip3 install gym[box2d] protobuf==3.20.* && 
+          pip install --upgrade pip setuptools wheel &&
+          pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment &&
+          pip install -r setup/devtools_reqs.txt &&
+          pip install "opencv-python-headless<4.3" gym[box2d] protobuf==3.20.* && 
+          pip install tianshou && 
+          pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113 &&
       ports:
         - name: TODO
           containerPort: 4444
