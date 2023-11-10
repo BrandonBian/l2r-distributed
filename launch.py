@@ -59,12 +59,11 @@ if training_paradigm == "sequential":
     if RL_env == "l2r":
         command += "cd /home/LinuxNoEditor/ && "
         command += "sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-        command += "sleep 15m && "
-        command += "cd / && "
-        command += "cd l2r-distributed && "
-        command += "git checkout sequential && "
+        command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
+        command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
+        command += "mamba activate l2r && git checkout sequential && "
     
-    command += f"python3.8 -m scripts.main --env {RL_env} "
+    command += f"python -m scripts.main --env {RL_env} "
     command += "--wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a "
     command += f"--exp_name {exp_name}"
     
