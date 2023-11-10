@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 
 # Install Anaconda
 wget https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh
@@ -14,5 +14,3 @@ conda install -c conda-forge mamba -y
 # Create l2r environment using mamba
 mamba create --name l2r python=3.8 -y
 mamba init
-
-source ~/.bashrc
