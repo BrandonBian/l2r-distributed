@@ -57,8 +57,7 @@ if training_paradigm == "sequential":
     
     # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
     if RL_env == "l2r":
-        command += "cd /home/LinuxNoEditor/ && "
-        command += "sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
+        command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
         command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
         command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
         command += "mamba activate l2r && git checkout sequential && "
@@ -98,9 +97,9 @@ else:
             # NOTE: for l2r we need to start Arrival Simulator
             if RL_env == "l2r":
                 command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-                command += "sleep 15m && "
-                command += "source /root/anaconda3/bin/activate && conda activate initialization && mamba activate l2r "
-                command += "cd /workspace/l2r-distributed && "
+                command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
+                command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
+                command += "mamba activate l2r && "
             
             command += f" python worker.py --env {RL_env} --paradigm {training_paradigm}"
             
