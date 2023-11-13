@@ -9,8 +9,24 @@ import typing as tp
 
 def yamlize(configurable_class):
     # define a new display method
+    """Class decorator for configuration. See any of the configurable classes for more.
+
+    Args:
+        configurable_class (type): Some class to add configuration parameters to.
+    """
 
     def convert_type_to_strictyaml(val):
+        """Convert generic typing type to strictyaml validator
+
+        Args:
+            val (type): Type parameter from docstring
+
+        Raises:
+            ValueError: When type is not currently convertible.
+
+        Returns:
+            sl.validator: strictyaml validator for YAML checking.
+        """
 
         type_container = tp.get_origin(val)
         if type_container == tuple:
@@ -59,6 +75,14 @@ def yamlize(configurable_class):
     configurable_class.schema = schema
 
     def init_from_config_dict(cls, config):
+        """Initialize class from config dictionary
+
+        Args:
+            config (dictionary): Create instance of class from dictionary.
+
+        Returns:
+            cls: Object from class and config.
+        """
         config_yamlized = yaml.dump(config)
         config_dict = sl.load(config_yamlized, schema).data
         return cls(**config_dict)
@@ -66,6 +90,17 @@ def yamlize(configurable_class):
     configurable_class.instantiate_from_config_dict = classmethod(init_from_config_dict)
 
     def init_from_config(cls, config_file_location):
+        """Initialize class from config file
+
+        Args:
+            config_file_location (path): Path to config file
+
+        Raises:
+            ValueError: Error loading file
+
+        Returns:
+            cls: object from class.
+        """
         with open(config_file_location, "r") as mf:
             yaml_str = mf.read()
         try:
@@ -81,7 +116,6 @@ def yamlize(configurable_class):
             raise ValueError(config_dict)
 
     configurable_class.instantiate_from_config = classmethod(init_from_config)
-
     return configurable_class
 
 
@@ -95,11 +129,22 @@ class NameToSourcePath(Enum):
 
 
 class ConfigurableDict(TypedDict):
+    """Dict specification for nested config files."""
+
     name: str
     config: dict
 
 
 def create_configurable(config_yaml, name_to_path):
+    """Create configurable object from config file path and source location
+
+    Args:
+        config_yaml (str): Config yaml location
+        name_to_path (NameToSourcePath): Map from class type to source location
+
+    Returns:
+        object: Instantiated object.
+    """
     name_to_path = str(name_to_path.value)
     schema = sl.Map({"name": sl.Str(), "config": sl.Any()})
     with open(config_yaml, "r") as mf:
@@ -111,6 +156,15 @@ def create_configurable(config_yaml, name_to_path):
 
 
 def create_configurable_from_dict(config_dict, name_to_path):
+    """Create configurable object from config dict and soruce location
+
+    Args:
+        config_dict (dict): Config dict
+        name_to_path (NameToSourcePath): Map from class type to source location
+
+    Returns:
+        object: Instantiated object.
+    """
     name_to_path = str(name_to_path.value)
     schema = sl.Map({"name": sl.Str(), "config": sl.Any()})
     yaml_contents = yaml.dump(config_dict)
