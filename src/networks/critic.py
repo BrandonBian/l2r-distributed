@@ -16,6 +16,16 @@ from src.config.yamlize import (
 
 
 def mlp(sizes, activation=nn.ReLU, output_activation=nn.Identity):
+    """Generate MLP from inputs
+
+    Args:
+        sizes (list[int]): List of sizes
+        activation (nn.Module, optional): Activation function for hidden layers. Defaults to nn.ReLU.
+        output_activation (nn.Module, optional): Activation function for output layer. Defaults to nn.Identity.
+
+    Returns:
+        nn.Module: MLP
+    """
     layers = []
     for j in range(len(sizes) - 1):
         act = activation if j < len(sizes) - 2 else output_activation
