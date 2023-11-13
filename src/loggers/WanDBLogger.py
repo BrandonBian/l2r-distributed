@@ -1,3 +1,4 @@
+"""Weights and Biases Logging."""
 from src.loggers.base import BaseLogger
 from src.config.yamlize import yamlize
 import logging, re, sys
@@ -6,8 +7,17 @@ from datetime import datetime
 
 
 class WanDBLogger(BaseLogger):
+    """Wandb Logger Wrapper."""
+
     def __init__(self, api_key: str, project_name: str, exp_name: str) -> None:
-        # super().__init__(log_dir, experiment_name)
+        """Create Weights and Biases Logger
+
+        Args:
+            api_key (str): api key (DO NOT STORE IN REPO)
+            project_name (str): project name
+            exp_name (str): the experiment name (name of the run)
+        """
+        
         wandb.login(key=api_key)
         wandb.init(project=project_name, name=exp_name)
 

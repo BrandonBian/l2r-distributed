@@ -1,9 +1,18 @@
+"""Logger Base Class."""
 from abc import ABC, abstractmethod
 import os
 
 
 class BaseLogger(ABC):
+    """Base Logger."""
+
     def __init__(self, log_dir, exp_name) -> None:
+        """Initialize logger
+
+        Args:
+            log_dir (str): Log directory
+            exp_name (str): Experiment Name
+        """
         super().__init__()
         self.exp_name = exp_name
         self.log_dir = log_dir

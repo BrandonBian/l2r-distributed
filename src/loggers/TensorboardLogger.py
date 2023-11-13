@@ -1,3 +1,4 @@
+"""Wrapper around TensorBoard for logging. Unused for WandB, but should work."""
 from datetime import datetime
 import os
 from src.loggers.base import BaseLogger
@@ -6,7 +7,16 @@ from tensorboardX import SummaryWriter
 
 
 class TensorboardLogger(BaseLogger):
+    """TBLogger Instance"""
+
     def __init__(self, log_dir: str, experiment_name: str) -> None:
+        """TensorBoard Logger
+
+        Args:
+            log_dir (str): Log directory
+            experiment_name (str): Experiment Name
+        """
+
         super().__init__(log_dir, experiment_name)
         current_time = datetime.now().strftime("%m%d%H%M%S")
         self.exp_name = experiment_name
