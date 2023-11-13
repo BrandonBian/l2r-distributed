@@ -6,4 +6,4 @@ config:
   lr: 0.0003
   alpha: 0.2 # ent_coef
   steps_to_sample_randomly: 10 # start_steps
-  actor_critic_cfg_path: './config_files/mcar_sac/network.yaml'
+  actor_critic_cfg: './config_files/mcar_sac/network.yaml'
