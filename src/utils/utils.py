@@ -102,6 +102,8 @@ class RecordExperience:
 
 @dataclass
 class ActionSample:
+    """Generic object to store action-related params. Might be useful to remove."""
+
     action = None
     value = None
     logp = None
