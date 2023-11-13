@@ -1,0 +1,9 @@
+# Reference: https://github.com/DLR-RM/rl-baselines3-zoo/blob/9bbabc1f92e14ff33431e7d8b0d525f0a29f4103/hyperparams/sac.yml#L41
+name: SACAgent
+config:
+  gamma: 0.98
+  polyak: 0.98 # (1 - tau)
+  lr: 0.00073
+  alpha: 0.2 # ent_coef
+  steps_to_sample_randomly: 10 # start_steps
+  actor_critic_cfg_path: './config_files/walker_sac/network.yaml'

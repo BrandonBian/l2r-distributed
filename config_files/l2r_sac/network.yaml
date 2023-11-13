@@ -1,0 +1,19 @@
+name:
+  ActorCritic
+config:
+  activation: ReLU
+  critic_cfg:
+    name:
+      Qfunction
+    config:
+      use_speed:
+        True
+      fusion_hiddens:
+        - 128
+        - 128
+  use_speed:
+    True
+  fusion_hiddens:
+    - 128
+    - 128
+
