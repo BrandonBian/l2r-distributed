@@ -26,4 +26,3 @@ spec:
       source ./setup-mamba.sh &&
       mamba activate l2r &&
       cd /workspace/l2r-distributed &&
-      git checkout sequential && 

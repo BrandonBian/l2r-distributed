@@ -6,14 +6,7 @@ config:
     name:
       Qfunction
     config:
-      use_speed:
+      use_speed: 
         True
-      fusion_hiddens:
-        - 128
-        - 128
   use_speed:
     True
-  fusion_hiddens:
-    - 128
-    - 128
-

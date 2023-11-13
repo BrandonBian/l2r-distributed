@@ -1,9 +1,15 @@
-# Reference: https://github.com/DLR-RM/rl-baselines3-zoo/blob/9bbabc1f92e14ff33431e7d8b0d525f0a29f4103/hyperparams/sac.yml#L2
 name: SACAgent
 config:
-  gamma: 0.9999
-  polyak: 0.99 # (1 - tau)
-  lr: 0.0003
-  alpha: 0.2 # ent_coef
+  make_random_actions: 0
+  gamma: 0.99
+  polyak: 0.995
+  lr: 0.0005
+  alpha: 0.2
   steps_to_sample_randomly: 10 # start_steps
+  checkpoint: '/mnt/SAC_VAE/best_SAC_VAE_episode_200.statedict'
   actor_critic_cfg: './config_files/mcar_sac/network.yaml'
+  load_checkpoint: False
+  model_save_path: '/mnt'
+  record_dir: '/mnt'
+  experiment_name: 'pixiethecat'
+  track_name: 'Thruxton'

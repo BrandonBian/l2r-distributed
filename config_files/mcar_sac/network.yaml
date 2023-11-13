@@ -5,8 +5,7 @@ config:
   state_dim: 2
   action_dim: 1
   fusion_hiddens:
-    - 64
-    - 64
+    - 400
   critic_cfg:
     name:
       Qfunction
@@ -14,8 +13,7 @@ config:
       state_dim: 2
       action_dim: 1
       fusion_hiddens:
-        - 64
-        - 64
+        - 400
       use_speed:
         False
   use_speed:
