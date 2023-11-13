@@ -126,7 +126,8 @@ class NameToSourcePath(Enum):
     runner = "src.runners"
     agent = "src.agents"
     network = "src.networks"
-
+    planner = "src.agents.petsplanners"
+    environment = "src.envs"
 
 class ConfigurableDict(TypedDict):
     """Dict specification for nested config files."""
