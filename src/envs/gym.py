@@ -18,6 +18,8 @@ class GymEnv:
             env_name (str): Name of environement
         """
         self.env = gym.make(env_name)
+        print("[Gym Init] Environment observation space:", self.env.observation_space.shape)
+        print("[Gym Init] Environment action space:", self.env.action_space.shape)
 
     def step(self, action):
         (obs_encoded_new, reward, done, info) = self.env.step(action)

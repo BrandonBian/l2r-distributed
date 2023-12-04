@@ -3,4 +3,4 @@ from src.agents.SACAgent import SACAgent
 from src.agents.PPOAgent import PPOAgent
 from src.agents.SACAgent_CleanRL import CleanSACAgent
 from src.agents.PETSAgent import PETSAgent
-from src.agents.SACVanilla import SACVanilla
+from src.agents.SACAgent_OpenAI import SACAgent_OpenAI
