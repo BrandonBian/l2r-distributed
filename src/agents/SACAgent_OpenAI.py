@@ -48,9 +48,6 @@ class SACAgent_OpenAI(BaseAgent):
         self.actor_critic = actor_critic
         self.ac_kwargs = ac_kwargs
         
-        self.determinisitic = False
-        self.t = 0
-
     def init_network(self, obs_space, action_space):
         # Create actor-critic module and target networks
         self.actor_critic = self.actor_critic(obs_space, action_space, **self.ac_kwargs)
@@ -61,7 +58,7 @@ class SACAgent_OpenAI(BaseAgent):
             p.requires_grad = False
             
         # List of parameters for both Q-networks (save this for convenience)
-        q_params = itertools.chain(self.actor_critic.q1.parameters(), self.actor_critic.q2.parameters())
+        self.q_params = itertools.chain(self.actor_critic.q1.parameters(), self.actor_critic.q2.parameters())
 
         # Count variables
         var_counts = tuple(count_vars(module) for module in [self.actor_critic.pi, self.actor_critic.q1, self.actor_critic.q2])
@@ -69,7 +66,7 @@ class SACAgent_OpenAI(BaseAgent):
 
         # Set up optimizers for policy and q-function
         self.pi_optimizer = Adam(self.actor_critic.pi.parameters(), lr=self.lr)
-        self.q_optimizer = Adam(q_params, lr=self.lr)
+        self.q_optimizer = Adam(self.q_params, lr=self.lr)
 
     # Set up function for computing SAC Q-losses
     def compute_loss_q(self, data):
@@ -116,16 +113,13 @@ class SACAgent_OpenAI(BaseAgent):
 
         return loss_pi, pi_info
 
-    def select_action(self, obs):
-        action_obj = ActionSample()
-
-        a = self.actor_critic.act(obs.to(DEVICE), self.deterministic)
+    def select_action(self, obs, deterministic=False):
+        a = self.actor_critic.act(torch.from_numpy(obs), deterministic)
         if a.shape == ():
             # In case a is a scalar
             a = np.array([a])
 
-        action_obj.action = a
-        return action_obj
+        return a
 
     def load_model(self, path_or_checkpoint):
         if isinstance(path_or_checkpoint, str):

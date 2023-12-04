@@ -3,3 +3,11 @@ config:
   agent_config_path: "config_files/walker_sac_openai/agent.yaml"
   buffer_config_path: "config_files/walker_sac_openai/buffer.yaml"
   env_config_path: "config_files/walker_sac_openai/env.yaml"
+  steps_per_epoch: 4000
+  epochs: 500000
+  start_steps: 1000
+  max_ep_len: 1000
+  update_after: 2000
+  update_every: 100
+  batch_size: 256
+  num_test_episodes: 10
