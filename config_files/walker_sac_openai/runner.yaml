@@ -1,0 +1,5 @@
+name: OpenAIRunner
+config:
+  agent_config_path: "config_files/walker_sac_openai/agent.yaml"
+  buffer_config_path: "config_files/walker_sac_openai/buffer.yaml"
+  env_config_path: "config_files/walker_sac_openai/env.yaml"
