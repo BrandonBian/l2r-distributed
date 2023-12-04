@@ -94,7 +94,7 @@ class ModelFreeRunner(BaseRunner):
             with open(self.experiment_state_path, "r") as openfile:
                 json_object = openfile.readline()
             running_vars = jsonpickle.decode(json_object)
-            # self.replay_buffer = old_runner_obj.replay_buffer
+
             self.best_ret = running_vars["current_best_ret"]
             self.last_saved_episode = running_vars["last_saved_episode"]
             self.replay_buffer = running_vars["buffer"]
@@ -116,17 +116,18 @@ class ModelFreeRunner(BaseRunner):
             self.wandb_logger = WanDBLogger(
                 api_key=api_key, project_name="l2r", exp_name=exp_name
             )
+
         t = 0
         start_idx = self.last_saved_episode
-        for ep_number in range(start_idx + 1, self.num_run_episodes + 1):
 
+        for ep_number in range(start_idx + 1, self.num_run_episodes + 1):
             done = False
 
             obs_encoded = self.env_wrapped.reset(options={"random_pos": True})
 
             ep_ret = 0
-            total_reward = 0
             info = None
+
             while not done:
                 t += 1
                 self.agent.deterministic = False
@@ -190,14 +191,13 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
-                    print("[Train Reward]:", ep_ret)
                     self.wandb_logger.log(
                         {
-                            "reward": ep_ret,
+                            "Train reward": ep_ret,
                         }
                     )
 
-            self.checkpoint_model(ep_ret, ep_number)
+            # self.checkpoint_model(ep_ret, ep_number)
 
     def eval(self):
         """Evaluate model on the evaluation environment, using a deterministic agent if possible.
@@ -208,7 +208,6 @@ class ModelFreeRunner(BaseRunner):
         Returns:
             float: The max reward for each test session.
         """
-        print(">> Evaluation:")
         val_ep_rets = []
 
         # Not implemented for logging multiple test episodes
@@ -285,15 +284,11 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
-                    print("[Eval reward]:", eval_ep_ret)
                     self.wandb_logger.log(
                         {
                             "Eval reward": eval_ep_ret,
                         }
                     )
-
-            # TODO: add back - info no longer contains "pct_complete"
-            # self.agent.update_best_pct_complete(info)
 
         return max(val_ep_rets)
 
@@ -310,7 +305,7 @@ class ModelFreeRunner(BaseRunner):
             self.best_ret = max(ep_ret, self.best_ret)
             save_path = f"{self.model_save_dir}/{self.experiment_name}/best_{self.experiment_name}_episode_{ep_number}.statedict"
             self.agent.save_model(save_path)
-            self.save_experiment_state(ep_number)
+            # self.save_experiment_state(ep_number)
 
     def save_experiment_state(self, ep_number):
         """Save running variables for experiment state resuming.
