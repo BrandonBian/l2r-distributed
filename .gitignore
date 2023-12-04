@@ -11,6 +11,7 @@ env/
 environment/
 docs/build/*
 .vscode
+wandb/
 
 # Newly created kubectl yaml files
 kubernetes/mcar-sequential.yaml
