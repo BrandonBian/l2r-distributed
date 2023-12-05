@@ -38,7 +38,7 @@ if __name__ == "__main__":
             "config_files/mcar_sac/runner.yaml", NameToSourcePath.runner)
     elif args.env == "walker":
         runner = create_configurable(
-            "config_files/walker_sac_openai/runner.yaml", NameToSourcePath.runner)
+            "config_files/walker_sac/runner.yaml", NameToSourcePath.runner)
     else:
         raise NotImplementedError
 
