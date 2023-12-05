@@ -4,7 +4,7 @@
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 chmod +x ./Miniforge3-Linux-x86_64.sh
 ./Miniforge3-Linux-x86_64.sh -b
-source ~/miniforge-pypy3/bin/activate 
+source ~/miniforge3/bin/activate 
 
 # Create l2r environment using mamba
 mamba create --name l2r python=3.8 -y
