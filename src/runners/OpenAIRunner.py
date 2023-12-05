@@ -74,7 +74,7 @@ class OpenAIRunner():
 
         # Prepare for interaction with environment
         total_steps = self.steps_per_epoch * self.epochs
-        start_time = time.time()
+        train_timer = time.time()
         o, ep_ret, ep_len = self.env_wrapped.reset(), 0, 0
 
         # Main loop: collect experience in env and update/log each epoch
@@ -107,7 +107,16 @@ class OpenAIRunner():
 
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
-                print("Episode reward:", ep_ret)
+                train_duration = time.time() - train_timer
+                train_timer = time.time()
+
+                self.wandb_logger.log(
+                    {
+                        "Episode Reward": ep_ret,
+                        "Episode Duration": train_duration
+                    }
+                )
+
                 o, ep_ret, ep_len = self.env_wrapped.reset(), 0, 0
                 
             # Update handling
@@ -119,9 +128,13 @@ class OpenAIRunner():
             # End of epoch handling
             if (t+1) % self.steps_per_epoch == 0:
                 epoch = (t+1) // self.steps_per_epoch
-                eval_ret = eval()
+                eval_ret = self.eval()
 
-                print(f"[Epoch = {epoch}] Eval Reward: {eval_ret}")
+                self.wandb_logger.log(
+                    {
+                        "Eval Reward": eval_ret
+                    }
+                )
 
 
     def eval(self):
