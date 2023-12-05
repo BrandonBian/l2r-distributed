@@ -47,6 +47,7 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo apt-get update
 sudo apt-get upgrade libstdc++6 -y
+sudo apt install git
 
 # Prepare the repository
 cd /
