@@ -33,7 +33,6 @@ mamba install -c conda-forge tianshou -y
 pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
 pip install git+https://github.com/learn-to-race/l2r@aicrowd-environment
 pip install tianshou
-pip install strictyaml
 
 # Set up Ubuntu update (run multiple times in case failed)
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
@@ -47,7 +46,6 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo apt-get update
 sudo apt-get upgrade libstdc++6 -y
-sudo apt install git
 
 # Prepare the repository
 cd /
