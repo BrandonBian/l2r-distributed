@@ -119,6 +119,7 @@ class ModelFreeRunner(BaseRunner):
 
         t = 0
         start_idx = self.last_saved_episode
+        train_timer = time.time()
 
         for ep_number in range(start_idx + 1, self.num_run_episodes + 1):
             done = False
@@ -191,9 +192,13 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
+                    train_duration = time.time() - train_timer
+                    train_timer = time.time()
+
                     self.wandb_logger.log(
                         {
-                            "Train reward": ep_ret,
+                            "Episode Reward": ep_ret,
+                            "Episode Duration": train_duration
                         }
                     )
 
@@ -286,7 +291,7 @@ class ModelFreeRunner(BaseRunner):
                     # Non-L2R
                     self.wandb_logger.log(
                         {
-                            "Eval reward": eval_ep_ret,
+                            "Eval Reward": eval_ep_ret,
                         }
                     )
 
