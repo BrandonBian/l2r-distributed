@@ -9,8 +9,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--env",
-        choices=["l2r", "mcar", "walker"],
-        help="Select the environment ('l2r', 'mcar', or 'walker')."
+        choices=["l2r", "mcar", "walker", "walker-openai"]
     )
 
     parser.add_argument(
@@ -31,14 +30,13 @@ if __name__ == "__main__":
     print(f"Environment: {args.env} | Experiment: {args.exp_name}")
 
     if args.env == "l2r":
-        runner = create_configurable(
-            "config_files/l2r_sac/runner.yaml", NameToSourcePath.runner)
+        runner = create_configurable("config_files/l2r_sac/runner.yaml", NameToSourcePath.runner)
     elif args.env == "mcar":
-        runner = create_configurable(
-            "config_files/mcar_sac/runner.yaml", NameToSourcePath.runner)
+        runner = create_configurable("config_files/mcar_sac/runner.yaml", NameToSourcePath.runner)
     elif args.env == "walker":
-        runner = create_configurable(
-            "config_files/walker_sac/runner.yaml", NameToSourcePath.runner)
+        runner = create_configurable("config_files/walker_sac/runner.yaml", NameToSourcePath.runner)
+    elif args.env == "walker-openai":
+        runner = create_configurable("config_files/openai/walker_sac/runner.yaml", NameToSourcePath.runner)
     else:
         raise NotImplementedError
 

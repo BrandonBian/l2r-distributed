@@ -4,8 +4,8 @@ import yaml
 ############################
 # - Input Configurations - #
 ############################
-# Define the RL environment ('mcar', 'walker', 'l2r')
-RL_env = input("Select RL environment (mcar/walker/l2r): ").strip()
+# Define the RL environment
+RL_env = input("Select RL environment (l2r/mcar/walker/walker-openai): ").strip()
 
 # Define the training paradigm ('sequential', 'dCollect', 'dUpdate')
 training_paradigm = input("Select training paradigm (sequential/dCollect/dUpdate): ").strip()
@@ -19,7 +19,7 @@ if training_paradigm != "sequential":
 exp_name = input("Input WandB experiment name: ").strip()
 
 # Sanity check
-assert RL_env in ("mcar", "walker", "l2r")
+assert RL_env in ("mcar", "walker", "l2r", "walker-openai")
 assert training_paradigm in ("sequential", "dCollect", "dUpdate")
 
 # Fetch the corresponding source file
@@ -41,7 +41,6 @@ else:
 print("----------")
 print(f"RL Environment = [{RL_env}] | Training Paradigm = [{training_paradigm}] | Number of Workers = [{num_workers}] | Experiment Name = [{exp_name}] ---")
 print("----------")
-
 
 ######################################
 # - Configure Template: Sequential - #
