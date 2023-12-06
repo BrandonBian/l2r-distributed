@@ -58,7 +58,7 @@ if training_paradigm == "sequential":
     if RL_env == "l2r":
         command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
         command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
-        command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
+        command += "source ~/miniforge3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
         command += "mamba activate l2r && git checkout sequential && "
     
     command += f"python -m scripts.main --env {RL_env} "
@@ -97,7 +97,7 @@ else:
             if RL_env == "l2r":
                 command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
                 command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
-                command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
+                command += "source ~/miniforge3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
                 command += "mamba activate l2r && "
             
             command += f" python worker.py --env {RL_env} --paradigm {training_paradigm}"
