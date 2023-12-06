@@ -43,7 +43,8 @@ class OpenAIRunner():
         batch_size: int,
         num_test_episodes: int
     ):
-        
+        print("[Runner Init] Runner - OpenAI")
+
         # Fetch agent, replay buffer, and environment wrapper
         self.agent = create_configurable(agent_config_path, NameToSourcePath.agent)
         self.replay_buffer = create_configurable(buffer_config_path, NameToSourcePath.buffer)

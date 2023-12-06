@@ -29,18 +29,7 @@ if __name__ == "__main__":
     # Initialize the runner and start run
     print(f"Environment: {args.env} | Experiment: {args.exp_name}")
 
-    if args.env == "l2r":
-        runner = create_configurable("config_files/l2r_sac/runner.yaml", NameToSourcePath.runner)
-    elif args.env == "mcar":
-        runner = create_configurable("config_files/mcar_sac/runner.yaml", NameToSourcePath.runner)
-    elif args.env == "walker":
-        runner = create_configurable("config_files/walker_sac/runner.yaml", NameToSourcePath.runner)
-    elif args.env == "walker-openai":
-        runner = create_configurable("config_files/openai/walker_sac/runner.yaml", NameToSourcePath.runner)
-    elif args.env == "lander-openai":
-        runner = create_configurable("config_files/openai/lander_sac/runner.yaml", NameToSourcePath.runner)
-    else:
-        raise NotImplementedError
+    runner = create_configurable(f"config_files/{args.env}/runner.yaml", NameToSourcePath.runner)
 
     torch.autograd.set_detect_anomaly(True)
     runner.run(args.wandb_apikey, args.exp_name)

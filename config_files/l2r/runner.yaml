@@ -1,8 +1,8 @@
 name: ModelFreeRunner
 config:
-  agent_config_path: "config_files/l2r_sac/agent.yaml"
-  buffer_config_path: "config_files/l2r_sac/buffer.yaml"
-  env_config_path: "config_files/l2r_sac/env.yaml"
+  agent_config_path: "config_files/l2r/agent.yaml"
+  buffer_config_path: "config_files/l2r/buffer.yaml"
+  env_config_path: "config_files/l2r/env.yaml"
   model_save_dir: '/mnt'
   experiment_state_path: '/mnt/SAC_VAE/experimentState.json'
   experiment_name: 'SAC_VAE'

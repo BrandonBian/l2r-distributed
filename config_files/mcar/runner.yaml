@@ -1,8 +1,8 @@
 name: ModelFreeRunner
 config:
-  agent_config_path: "config_files/walker_sac/agent.yaml"
-  buffer_config_path: "config_files/walker_sac/buffer.yaml"
-  env_config_path: "config_files/walker_sac/env.yaml"
+  agent_config_path: "config_files/mcar/agent.yaml"
+  buffer_config_path: "config_files/mcar/buffer.yaml"
+  env_config_path: "config_files/mcar/env.yaml"
   model_save_dir: '/mnt'
   experiment_state_path: '/mnt/SAC_VAE/experimentState.json'
   experiment_name: 'SAC_VAE'
