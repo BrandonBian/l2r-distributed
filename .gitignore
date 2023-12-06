@@ -14,14 +14,20 @@ docs/build/*
 wandb/
 
 # Newly created kubectl yaml files
+## Mountain Car
 kubernetes/mcar-sequential.yaml
 kubernetes/mcar-dUpdate.yaml
 kubernetes/mcar-dCollect.yaml
 
+## Bipedal Walker
 kubernetes/walker-sequential.yaml
 kubernetes/walker-dUpdate.yaml
 kubernetes/walker-dCollect.yaml
 
+## Bipedal Walker - Vanilla OpenAI Implementation
+kubernetes/walker-openai-sequential.yaml
+
+## Learn To Race
 kubernetes/l2r-sequential.yaml
 kubernetes/l2r-dUpdate.yaml
 kubernetes/l2r-dCollect.yaml
