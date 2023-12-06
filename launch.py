@@ -5,7 +5,7 @@ import yaml
 # - Input Configurations - #
 ############################
 # Define the RL environment
-RL_env = input("Select RL environment (l2r/mcar/walker/walker-openai): ").strip()
+RL_env = input("Select RL environment (l2r/mcar/walker/walker-openai/lander-openai): ").strip()
 
 # Define the training paradigm ('sequential', 'dCollect', 'dUpdate')
 training_paradigm = input("Select training paradigm (sequential/dCollect/dUpdate): ").strip()
@@ -19,7 +19,7 @@ if training_paradigm != "sequential":
 exp_name = input("Input WandB experiment name: ").strip()
 
 # Sanity check
-assert RL_env in ("mcar", "walker", "l2r", "walker-openai")
+assert RL_env in ("mcar", "walker", "l2r", "walker-openai", "lander-openai")
 assert training_paradigm in ("sequential", "dCollect", "dUpdate")
 
 # Fetch the corresponding source file
@@ -57,9 +57,9 @@ if training_paradigm == "sequential":
     # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
     if RL_env == "l2r":
         command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-        command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
-        command += "source ~/miniforge3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
-        command += "mamba activate l2r && git checkout sequential && "
+        command += "sleep 13m && "  # Wait a few minutes for the installations to complete and the simulator to start running
+        command += "source ~/miniforge3/bin/activate && mamba activate l2r && "
+        command += "cd /workspace/l2r-distributed && git checkout sequential && "
     
     command += f"python -m scripts.main --env {RL_env} "
     command += "--wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a "
@@ -96,9 +96,9 @@ else:
             # NOTE: for l2r we need to start Arrival Simulator
             if RL_env == "l2r":
                 command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-                command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
-                command += "source ~/miniforge3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
-                command += "mamba activate l2r && "
+                command += "sleep 13m && "  # Wait a few minutes for the installations to complete and the simulator to start running
+                command += "source ~/miniforge3/bin/activate && mamba activate l2r && "
+                command += "cd /workspace/l2r-distributed && git checkout sequential && "
             
             command += f" python worker.py --env {RL_env} --paradigm {training_paradigm}"
             
