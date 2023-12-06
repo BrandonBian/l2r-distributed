@@ -49,6 +49,7 @@ class SACAgent(BaseAgent):
         lr: float,
     ):
         super(SACAgent, self).__init__()
+        print("[Agent Init] SACAgent")
 
         self.steps_to_sample_randomly = steps_to_sample_randomly
         self.record_dir = record_dir

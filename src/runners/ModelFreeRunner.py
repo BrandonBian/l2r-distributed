@@ -56,6 +56,7 @@ class ModelFreeRunner(BaseRunner):
             max_episode_length (int): Maximum episode length ( BAD PARAM / BUGGY. )
         """
         super().__init__()
+        print("[Runner Init] ModelFreeRunner")
         # Moved initialzation of env to run to allow for yamlization of this class.
         # This would allow a common runner for all model-free approaches
 

@@ -36,6 +36,7 @@ class SACAgent_OpenAI(BaseAgent):
         ac_kwargs=dict(), 
     ):
         super(SACAgent_OpenAI, self).__init__()
+        print("[Agent Init] SACAgent - OpenAI")
 
         torch.manual_seed(seed)
         np.random.seed(seed)

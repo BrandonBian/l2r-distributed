@@ -14,6 +14,7 @@ class ReplayBuffer_OpenAI:
     """
 
     def __init__(self, obs_dim: int, act_dim: int, size: int):
+        print("[Replay Buffer Init] ReplayBuffer - OpenAI")
         self.obs_buf = np.zeros(combined_shape(size, obs_dim), dtype=np.float32)
         self.obs2_buf = np.zeros(combined_shape(size, obs_dim), dtype=np.float32)
         self.act_buf = np.zeros(combined_shape(size, act_dim), dtype=np.float32)

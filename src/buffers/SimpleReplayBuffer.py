@@ -23,6 +23,7 @@ class SimpleReplayBuffer:
             size (int): Buffer size
             batch_size (int): Batch size
         """
+        print("[Replay Buffer Init] SimpleReplayBuffer")
         self.max_size = size
         self.obs_dim = obs_dim
         self.act_dim = act_dim
