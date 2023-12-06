@@ -183,7 +183,8 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
 
     def __init__(
             self,
-            agent: BaseAgent,
+            agent,
+            replay_buffer,
             update_steps: int = 10,
             batch_size: int = 128,  # Originally 128
             epochs: int = 500,  # Originally 500
@@ -205,22 +206,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.eval_prob = eval_prob
         self.paradigm = paradigm
 
-        # Create a replay buffer
-        self.buffer_size = buffer_size
-        if env_name == "mcar":
-            self.replay_buffer = create_configurable(
-                "config_files/async_sac_mcar/buffer.yaml", NameToSourcePath.buffer
-            )
-        elif env_name == "walker":
-            self.replay_buffer = create_configurable(
-                "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
-            )
-        elif env_name == "l2r":
-            self.replay_buffer = create_configurable(
-                "config_files/async_sac_l2r/buffer.yaml", NameToSourcePath.buffer
-            )
-        else:
-            raise NotImplementedError
+        self.replay_buffer = replay_buffer
 
         # Initial policy to use
         self.agent = agent
