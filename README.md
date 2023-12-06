@@ -7,14 +7,16 @@
   - Mountain Car: `MountainCarContinuous-v0`
   - Bipedal Walker: `BipedalWalker-v2`
   - Lunar Lander: `LunarLanderContinuous-v2`
+- **NOTE**: &#10004; means convergence, &#10003; means non-convergence. If no checkmark, not currently implemented.
 
-| RL Environments         | Sequential | Distributed Collection | Distributed Update |
-| ----------------------- | ---------- | ---------------------- | ------------------ |
-| Mountain Car            | &#10004;   | &#10004;               | &#10004;           |
-| Bipedal Walker          | &#10004;   | &#10004;               | &#10004;           |
-| Bipedal Walker - OpenAI | &#10004;   |                        |                    |
-| Lunar Lander - OpenAI   | &#10004;   |                        |                    |
-| Learn-to-race           | &#10004;   | &#10004;               | &#10004;           |
+
+| RL Environments         | Sequential                   | Distributed Collection | Distributed Update |
+| ----------------------- | ---------------------------- | ---------------------- | ------------------ |
+| Mountain Car            | &#10004;                     | &#10004;               | &#10004;           |
+| Bipedal Walker          | &#10003;                     | &#10003;               | &#10003;           |
+| Bipedal Walker - OpenAI | &#10003;                     |                        |                    |
+| Lunar Lander - OpenAI   | &#10004;                     |                        |                    |
+| Learn-to-race           | &#10004; (rough convergence) | &#10003;               | &#10003;           |
 
 
 ## Basic Kubernetes control commands
