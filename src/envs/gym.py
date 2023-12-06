@@ -19,6 +19,8 @@ class GymEnv:
         """
         self.env = gym.make(env_name)
         self.cuda = cuda
+        
+        print("[Gym Init] Environmen name:", env_name)
         print("[Gym Init] Environment observation space:", self.env.observation_space.shape)
         print("[Gym Init] Environment action space:", self.env.action_space.shape)
 
