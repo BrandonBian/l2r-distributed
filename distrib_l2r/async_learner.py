@@ -188,13 +188,11 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             update_steps: int = 10,
             batch_size: int = 128,  # Originally 128
             epochs: int = 500,  # Originally 500
-            buffer_size: int = 1_000_000,  # Originally 1M
             server_address: Tuple[str, int] = ("0.0.0.0", 4444),
             eval_prob: float = 0.20,
             save_func: Optional[Callable] = None,
             api_key: str = "",
             exp_name: str = "Undefined Distributed Run",
-            env_name: Optional[str] = None,
             paradigm: Optional[str] = None
     ) -> None:
         self.numThreads = 5  # Hardcode for now
