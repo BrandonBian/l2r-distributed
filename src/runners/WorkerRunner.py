@@ -31,8 +31,8 @@ class WorkerRunner(BaseRunner):
         self.buffer_config_path = buffer_config_path
         self.max_episode_length = max_episode_length
 
-        # AGENT Declaration
         self.agent = create_configurable(self.agent_config_path, NameToSourcePath.agent)
+        self.replay_buffer = create_configurable(self.buffer_config_path, NameToSourcePath.buffer)
 
     def run(self, env, agent_params, is_train=None, task=None):
         """Grab data for system that's needed, and send a buffer accordingly. Note: does a single 'episode'
@@ -54,9 +54,7 @@ class WorkerRunner(BaseRunner):
         state_encoded = torch.tensor(state_encoded)
 
         ep_ret = 0
-        self.replay_buffer = create_configurable(
-            self.buffer_config_path, NameToSourcePath.buffer
-        )
+        
         while not done:
             t += 1
             
