@@ -29,6 +29,8 @@ if __name__ == "__main__":
     
     # Configure worker (by training paradigm)
     worker = AsnycWorker(
+        # TODO: worker has its own copy of environment for collecting data
+        env=create_configurable(f"config_files/{args.env}/env.yaml", NameToSourcePath.environment),
         runner=create_configurable(f"config_files/{args.env}/worker.yaml", NameToSourcePath.runner),
         learner_address=learner_address, 
         paradigm=args.paradigm
