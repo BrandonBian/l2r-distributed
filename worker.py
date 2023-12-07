@@ -34,7 +34,6 @@ if __name__ == "__main__":
         env=create_configurable(f"config_files/{args.env}/env.yaml", NameToSourcePath.environment),
         runner=create_configurable(f"config_files/{args.env}/worker.yaml", NameToSourcePath.runner),
         learner_address=learner_address, 
-        env_name=args.env, 
         paradigm=args.paradigm
     )
 
