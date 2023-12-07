@@ -56,15 +56,14 @@ if training_paradigm == "sequential":
     
     # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
     if RL_env == "l2r":
-        command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-        command += "sleep 13m && "  # Wait a few minutes for the installations to complete and the simulator to start running
-        command += "source ~/miniforge3/bin/activate && mamba activate l2r && "
-        command += "cd /workspace/l2r-distributed && git checkout sequential && "
+        # Initiate the arrival simulator first, then install environment
+        prepend = "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
+        command = prepend + command
     
     command += f"python -m scripts.main --env {RL_env} "
     command += "--wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a "
     command += f"--exp_name {exp_name}"
-    
+
     assert "TODO" not in str(command)
     data["spec"]["containers"][0]["command"][2] = command
 
@@ -101,13 +100,12 @@ else:
             # Configure command
             command = section["spec"]["template"]["spec"]["containers"][0]["command"][2]
             
-            # NOTE: for l2r we need to start Arrival Simulator
+            # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
             if RL_env == "l2r":
-                command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-                command += "sleep 13m && "  # Wait a few minutes for the installations to complete and the simulator to start running
-                command += "source ~/miniforge3/bin/activate && mamba activate l2r && "
-                command += "cd /workspace/l2r-distributed && git checkout sequential && "
-            
+                # Initiate the arrival simulator first, then install environment
+                prepend = "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
+                command = prepend + command
+
             command += f" python worker.py --env {RL_env} --paradigm {training_paradigm}"
             
             section["spec"]["template"]["spec"]["containers"][0]["command"][2] = command
