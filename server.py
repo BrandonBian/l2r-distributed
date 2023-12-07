@@ -1,6 +1,5 @@
 from src.config.yamlize import NameToSourcePath, create_configurable
 import threading
-import sys
 import argparse
 
 from distrib_l2r.async_learner import AsyncLearningNode
@@ -11,7 +10,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--env",
-        choices=["l2r", "mcar", "walker"],
+        choices=["l2r", "mcar", "walker", "walker-openai", "lander-openai"],
     )
 
     parser.add_argument(

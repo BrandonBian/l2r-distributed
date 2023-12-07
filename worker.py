@@ -1,5 +1,4 @@
 import socket
-import os
 import argparse
 
 from src.config.yamlize import NameToSourcePath, create_configurable
@@ -11,8 +10,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--env",
-        choices=["l2r", "mcar", "walker"],
-        help="Select the environment ('l2r', 'mcar', or 'walker')."
+        choices=["l2r", "mcar", "walker", "walker-openai", "lander-openai"],
     )
 
     parser.add_argument(
