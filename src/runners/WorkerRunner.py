@@ -20,6 +20,7 @@ class WorkerRunner(BaseRunner):
         self, 
         agent_config_path: str, 
         buffer_config_path: str, 
+        env_config_path: str,
         max_episode_length: int,
     ):
         super().__init__()
@@ -29,12 +30,20 @@ class WorkerRunner(BaseRunner):
         # Initialize runner parameters
         self.agent_config_path = agent_config_path
         self.buffer_config_path = buffer_config_path
+        self.env_config_path = env_config_path
         self.max_episode_length = max_episode_length
 
         self.agent = create_configurable(self.agent_config_path, NameToSourcePath.agent)
         self.replay_buffer = create_configurable(self.buffer_config_path, NameToSourcePath.buffer)
+        self.env_wrapped = create_configurable(self.env_config_path, NameToSourcePath.environment)
 
-    def run(self, env, agent_params, is_train=None, task=None):
+        # Initialize network for OpenAI SAC agent
+        self.agent.init_network(
+            obs_space=self.env_wrapped.env.observation_space,
+            action_space=self.env_wrapped.env.action_space,
+        )
+
+    def run(self, agent_params, is_train=None, task=None):
         """Grab data for system that's needed, and send a buffer accordingly. Note: does a single 'episode'
            which might not be more than a segment in l2r's case.
 
@@ -50,7 +59,7 @@ class WorkerRunner(BaseRunner):
         self.agent.load_model(agent_params)
         t = 0
         done = False
-        state_encoded = env.reset()
+        state_encoded = self.env_wrapped.reset()
         state_encoded = torch.tensor(state_encoded)
 
         ep_ret = 0
@@ -68,8 +77,7 @@ class WorkerRunner(BaseRunner):
                 raise NotImplementedError
 
             action_obj = self.agent.select_action(state_encoded)
-            next_state_encoded, reward, done, info = env.step(
-                action_obj.action)
+            next_state_encoded, reward, done, info = self.env_wrapped.step(action_obj.action)
             
             next_state_encoded = torch.tensor(next_state_encoded)
             state_encoded.to(DEVICE)

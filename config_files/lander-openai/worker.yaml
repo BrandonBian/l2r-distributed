@@ -2,4 +2,5 @@ name: WorkerRunner
 config:
   agent_config_path: "config_files/lander-openai/agent.yaml"
   buffer_config_path: "config_files/lander-openai/buffer.yaml"
+  env_config_path: "config_files/lander-openai/env.yaml"
   max_episode_length: 50000 # max_ep_len
