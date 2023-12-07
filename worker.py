@@ -2,6 +2,7 @@ import socket
 import os
 import argparse
 
+from src.config.yamlize import NameToSourcePath, create_configurable
 from distrib_l2r.async_worker import AsnycWorker
 
 if __name__ == "__main__":
@@ -29,6 +30,12 @@ if __name__ == "__main__":
     learner_address = (learner_ip, 4444)
     
     # Configure worker (by training paradigm)
-    worker = AsnycWorker(learner_address=learner_address, env_name=args.env, paradigm=args.paradigm)
+    worker = AsnycWorker(
+        env=create_configurable(f"config_files/{args.env}/env.yaml", NameToSourcePath.environment),
+        runner=create_configurable(f"config_files/{args.env}/worker.yaml", NameToSourcePath.runner),
+        learner_address=learner_address, 
+        env_name=args.env, 
+        paradigm=args.paradigm
+    )
 
     worker.work()

@@ -33,79 +33,17 @@ class AsnycWorker:
     """An asynchronous worker"""
     def __init__(
             self,
+            env,
+            runner,
             learner_address: Tuple[str, int],
-            buffer_size: int = 5000,
-            env_wrapper: Optional[Wrapper] = None,
-            env_name: Optional[str] = None,
             paradigm: Optional[str] = None,
-            **kwargs,
     ) -> None:
+        print("[AsyncLearningNode Init] Paradigm =", paradigm)
         self.learner_address = learner_address
-        self.buffer_size = buffer_size
         self.mean_reward = 0.0
         self.paradigm = paradigm
-
-        # Build the environment and runner
-        if env_name == "mcar":
-            self.env = gym.make("MountainCarContinuous-v0")
-            self.runner = create_configurable(
-                "config_files/async_sac_mcar/worker.yaml", NameToSourcePath.runner
-            )
-        elif env_name == "walker":
-            self.env = gym.make("BipedalWalker-v3")
-            self.runner = create_configurable(
-                "config_files/async_sac_walker/worker.yaml", NameToSourcePath.runner
-            )
-        elif env_name == "l2r":
-            self.env = build_env(
-                controller_kwargs={"quiet": True},
-                env_kwargs=
-                    {
-                        "multimodal": True,
-                        "eval_mode": True,
-                        "n_eval_laps": 5,
-                        "max_timesteps": 5000,
-                        "obs_delay": 0.1,
-                        "not_moving_timeout": 50000,
-                        "reward_pol": "custom",
-                        "provide_waypoints": False,
-                        "active_sensors": [
-                            "CameraFrontRGB"
-                        ],
-                        "vehicle_params":False,
-                    },
-                action_cfg=
-                    {
-                        "ip": "0.0.0.0",
-                        "port": 7077,
-                        "max_steer": 0.3,
-                        "min_steer": -0.3,
-                        "max_accel": 6.0,
-                        "min_accel": -1,
-                    },
-                camera_cfg=[{
-                        "name": "CameraFrontRGB",
-                        "Addr": "tcp://0.0.0.0:8008",
-                        "Width": 512,
-                        "Height": 384,
-                        "sim_addr": "tcp://0.0.0.0:8008",
-                    }]
-            )
-
-            self.encoder = create_configurable(
-                "config_files/async_sac_l2r/encoder.yaml", NameToSourcePath.encoder
-            )
-            self.encoder.to(DEVICE)
-
-            self.env.action_space = gym.spaces.Box(np.array([-1, -1]), np.array([1.0, 1.0]))
-            self.env = EnvContainer(self.encoder, self.env)
-
-            self.runner = create_configurable(
-                "config_files/async_sac_l2r/worker.yaml", NameToSourcePath.runner
-            )
-
-        else:
-            raise NotImplementedError
+        self.env = env
+        self.runner = runner
 
         print("(worker.py) Action Space ==", self.env.action_space)
 
