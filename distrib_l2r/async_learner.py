@@ -195,6 +195,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             exp_name: str = "Undefined Distributed Run",
             paradigm: Optional[str] = None
     ) -> None:
+        print("[AsyncLearningNode Init] Paradigm =", paradigm)
         self.numThreads = 5  # Hardcode for now
         super().__init__(server_address, ThreadedTCPRequestHandler)
 
