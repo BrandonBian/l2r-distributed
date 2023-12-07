@@ -40,6 +40,7 @@ if __name__ == "__main__":
     learner = AsyncLearningNode(
         agent=create_configurable(f"config_files/{args.env}/agent.yaml", NameToSourcePath.agent),
         replay_buffer=create_configurable(f"config_files/{args.env}/buffer.yaml", NameToSourcePath.buffer),
+        env_wrapped=create_configurable(f"config_files/{args.env}/environment.yaml", NameToSourcePath.environment),
         api_key=args.wandb_apikey,
         exp_name=args.exp_name,
         paradigm=args.paradigm

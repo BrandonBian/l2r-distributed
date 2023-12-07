@@ -185,6 +185,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             self,
             agent,
             replay_buffer,
+            env_wrapped,
             update_steps: int = 10,
             batch_size: int = 128,
             epochs: int = 500,
@@ -210,6 +211,12 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         # Initial policy to use
         self.agent = agent
         self.agent_id = 1
+
+        # Initialize agent
+        self.agent.init_network(
+            obs_space=env_wrapped.env.observation_space,
+            action_space=env_wrapped.env.action_space,
+        )
 
         # The bytes of the policy to reply to requests with
         self.updated_agent = {k: v.cpu()
