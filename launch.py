@@ -74,6 +74,14 @@ if training_paradigm == "sequential":
 else:
     updated_yaml = []
 
+    # Special treatment for port name since it has 15 character length restriction
+    port_name = f"{RL_env}-{training_paradigm.lower()}"
+
+    if len(port_name) > 15:
+        original = port_name
+        port_name = port_name[:15]
+        print(f"[Warning] Port name exceeded 15 characters, truncating: {original} -> {port_name}")
+
     for idx, section in enumerate(data):
         if idx == 0:
             ##########################
@@ -111,7 +119,6 @@ else:
 
             # Configure names
             learner_name = f"{RL_env}-{training_paradigm.lower()}-learner"
-            port_name = f"{RL_env}-{training_paradigm.lower()}"
 
             section["metadata"]["name"] = learner_name
             section["spec"]["containers"][0]["name"] = learner_name
@@ -128,8 +135,8 @@ else:
             # Service for worker-learner communication #
             ############################################
             section["metadata"]["name"] = f"{RL_env}-{training_paradigm.lower()}-learner"
-            section["spec"]["ports"][0]["name"] = f"{RL_env}-{training_paradigm.lower()}"
-            section["spec"]["ports"][0]["targetPort"] = f"{RL_env}-{training_paradigm.lower()}"
+            section["spec"]["ports"][0]["name"] = port_name
+            section["spec"]["ports"][0]["targetPort"] = port_name
 
         assert "TODO" not in str(section)
         updated_yaml.append(section)

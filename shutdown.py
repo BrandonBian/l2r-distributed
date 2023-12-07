@@ -1,13 +1,13 @@
 import subprocess
 
-# Define the RL environment ('mcar', 'walker', 'l2r')
-RL_env = input("Select RL environment (mcar/walker/l2r): ").strip()
+# Define the RL environment
+RL_env = input("Select RL environment (l2r/mcar/walker/walker-openai/lander-openai): ").strip()
 
 # Define the training paradigm ('sequential', 'dCollect', 'dUpdate')
 training_paradigm = input("Select training paradigm (sequential/dCollect/dUpdate): ").strip()
 
 # Sanity check
-assert RL_env in ("mcar", "walker", "l2r")
+assert RL_env in ("mcar", "walker", "l2r", "walker-openai", "lander-openai")
 assert training_paradigm in ("sequential", "dCollect", "dUpdate")
 
 # Print the info
