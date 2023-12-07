@@ -147,6 +147,10 @@ class SACAgent(BaseAgent):
     def save_model(self, path):
         torch.save(self.actor_critic.state_dict(), path)
 
+    def init_network(self, obs_space, action_space):
+        # For compatibility with SACAgent_OpenAI
+        pass
+
     # def compute_loss_q(self, data):
 
     #     """Set up function for computing SAC Q-losses."""

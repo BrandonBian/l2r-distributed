@@ -40,5 +40,9 @@ class ReplayBuffer_OpenAI:
                      done=self.done_buf[idxs])
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
     
+    def __len__(self):
+        # For compatbility with SimpleReplayBuffer
+        return self.size
+    
     def finish_path(self, action_obj=None):
         pass
