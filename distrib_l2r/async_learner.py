@@ -186,8 +186,8 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             agent,
             replay_buffer,
             update_steps: int = 10,
-            batch_size: int = 128,  # Originally 128
-            epochs: int = 500,  # Originally 500
+            batch_size: int = 128,
+            epochs: int = 500,
             server_address: Tuple[str, int] = ("0.0.0.0", 4444),
             eval_prob: float = 0.20,
             save_func: Optional[Callable] = None,
