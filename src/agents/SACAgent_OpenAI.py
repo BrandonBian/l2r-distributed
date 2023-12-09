@@ -93,8 +93,8 @@ class SACAgent_OpenAI(BaseAgent):
         loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
-        q_info = dict(Q1Vals=q1.detach().numpy(),
-                      Q2Vals=q2.detach().numpy())
+        q_info = dict(Q1Vals=q1.cpu().numpy(),
+                      Q2Vals=q2.cpu().numpy())
 
         return loss_q, q_info
 
@@ -110,7 +110,7 @@ class SACAgent_OpenAI(BaseAgent):
         loss_pi = (self.alpha * logp_pi - q_pi).mean()
 
         # Useful info for logging
-        pi_info = dict(LogPi=logp_pi.detach().numpy())
+        pi_info = dict(LogPi=logp_pi.cpu().numpy())
 
         return loss_pi, pi_info
 
