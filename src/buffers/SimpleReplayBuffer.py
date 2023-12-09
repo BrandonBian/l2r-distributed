@@ -39,7 +39,8 @@ class SimpleReplayBuffer:
             # convert to deque
             obs = values["obs"]
             next_obs = values["next_obs"]
-            action = values["act"]
+            # TODO: this should automatically be tensor, but SACAgent.select_action() returns numpy somehow
+            action = torch.tensor(values["act"], device=DEVICE)
             reward = values["rew"]
             done = values["done"]
             currdict = {
