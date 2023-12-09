@@ -312,7 +312,7 @@ class ActorCritic(nn.Module):
                 )
             a, _ = self.policy(feat, deterministic, False)
             a = a.squeeze(0)
-        return a.numpy() if a.device == "cpu" else a.cpu().numpy()
+        return a
 
 
 class PPOMLPActorCritic(nn.Module):
