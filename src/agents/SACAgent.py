@@ -232,7 +232,7 @@ class SACAgent(BaseAgent):
             q1_pi_targ = self.actor_critic_target.q1(o2, pi)
             q2_pi_targ = self.actor_critic_target.q2(o2, pi)
             q_pi_targ = torch.min(q1_pi_targ, q2_pi_targ)
-            backup = r + self.gamma * (1 - d) * (q_pi_targ - self.alpha * logp_pi)
+            backup = r + self.gamma * (1 - d.float()) * (q_pi_targ - self.alpha * logp_pi)
 
         q1 = self.actor_critic.q1(o, a)
         q2 = self.actor_critic.q2(o, a)
