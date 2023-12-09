@@ -101,7 +101,15 @@ class OpenAIRunner():
             d = False if ep_len==self.max_ep_len else d
 
             # Store experience to replay buffer
-            self.replay_buffer.store({o, a, r, o2, d})
+            self.replay_buffer.store(
+                {
+                    "obs": o,
+                    "act": a,
+                    "rew": r,
+                    "next_obs": o2,
+                    "done": d,
+                }
+            )
 
             # Super critical, easy to overlook step: make sure to update 
             # most recent observation!
