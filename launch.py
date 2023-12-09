@@ -1,5 +1,7 @@
 import subprocess
 import yaml
+import random
+import string
 
 ############################
 # - Input Configurations - #
@@ -78,8 +80,8 @@ else:
 
     if len(port_name) > 15:
         original = port_name
-        port_name = port_name[:15]
-        print(f"[Warning] Port name exceeded 15 characters, truncating: {original} -> {port_name}")
+        port_name = port_name[:11] + '-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=3))
+        print(f"[Warning] Port name exceeded 15 characters, renaming: {original} -> {port_name}")
 
     for idx, section in enumerate(data):
         if idx == 0:
