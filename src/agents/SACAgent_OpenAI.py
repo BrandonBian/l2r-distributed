@@ -115,7 +115,7 @@ class SACAgent_OpenAI(BaseAgent):
         return loss_pi, pi_info
 
     def select_action(self, obs, deterministic=False):
-        a = self.actor_critic.act(torch.from_numpy(obs), deterministic)
+        a = self.actor_critic.act(obs, deterministic)
         if a.shape == ():
             # In case a is a scalar
             a = np.array([a])
