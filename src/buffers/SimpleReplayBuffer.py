@@ -73,25 +73,26 @@ class SimpleReplayBuffer:
             len(self.buffer), size=min(self.batch_size, len(self.buffer)), replace=False
         )
 
-        batch = dict()
-        for idx in idxs:
-            currdict = self.buffer[idx]
-            for k, v in currdict.items():
-                if isinstance(v, float):
-                    v  = torch.tensor([v], device=DEVICE)
-                if isinstance(v, bool):
-                    v  = torch.tensor([v], device=DEVICE)
-                if isinstance(v, int):
-                    v = torch.tensor([v], device=DEVICE)
-                if k in batch:
-                    batch[k].append(v)
-                else:
-                    batch[k] = [v]
+        return self.buffer[idxs]
 
-        return  {
-            k: torch.stack(v).to(DEVICE)
-            for k, v in batch.items()
-        }
+        # batch = dict()
+        # for idx in idxs:
+        #     currdict = self.buffer[idx]
+        #     for k, v in currdict.items():
+        #         if isinstance(v, float) or isinstance(v, bool) or isinstance(v, int):
+        #             v = torch.tensor([v], device=DEVICE)
+        #         else:
+        #             v = v.to(DEVICE)
+
+        #         if k in batch:
+        #             batch[k].append(v)
+        #         else:
+        #             batch[k] = [v]
+
+        # return  {
+        #     k: torch.stack(v)
+        #     for k, v in batch.items()
+        # }
 
     def finish_path(self, action_obj=None):
         """
