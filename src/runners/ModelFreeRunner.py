@@ -133,9 +133,9 @@ class ModelFreeRunner(BaseRunner):
             while not done:
                 t += 1
                 self.agent.deterministic = False
-                action_obj = self.agent.select_action(obs_encoded)
+                action = self.agent.select_action(obs_encoded)
                 obs_encoded_new, reward, done, info = self.env_wrapped.step(
-                    action_obj.action
+                    action
                 )
 
                 ep_ret += reward
@@ -143,14 +143,14 @@ class ModelFreeRunner(BaseRunner):
                 self.replay_buffer.store(
                     {
                         "obs": obs_encoded,
-                        "act": action_obj,
+                        "act": action,
                         "rew": reward,
                         "next_obs": obs_encoded_new,
                         "done": done,
                     }
                 )
                 if done or t == self.max_episode_length:
-                    self.replay_buffer.finish_path(action_obj)
+                    self.replay_buffer.finish_path(action)
 
                 obs_encoded = obs_encoded_new
                 if (t >= self.update_model_after) and (
@@ -238,13 +238,13 @@ class ModelFreeRunner(BaseRunner):
                 # Take deterministic actions at test time
                 self.agent.deterministic = True
                 self.t = 1e6
-                eval_action_obj = self.agent.select_action(eval_obs_encoded)
+                eval_action = self.agent.select_action(eval_obs_encoded)
                 (
                     eval_obs_encoded_new,
                     eval_reward,
                     eval_done,
                     eval_info,
-                ) = self.env_wrapped.step(eval_action_obj.action)
+                ) = self.env_wrapped.step(eval_action)
 
                 # Check that the camera is turned on
                 eval_ep_ret += eval_reward
