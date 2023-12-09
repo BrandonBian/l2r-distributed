@@ -39,7 +39,7 @@ class SimpleReplayBuffer:
             # convert to deque
             obs = values["obs"]
             next_obs = values["next_obs"]
-            action = torch.Tensor(values["act"]) # .detach().cpu().numpy()
+            action = values["act"]
             reward = values["rew"]
             done = values["done"]
             currdict = {
@@ -73,26 +73,24 @@ class SimpleReplayBuffer:
             len(self.buffer), size=min(self.batch_size, len(self.buffer)), replace=False
         )
 
-        return self.buffer[idxs]
+        batch = dict()
+        for idx in idxs:
+            currdict = self.buffer[idx]
+            for k, v in currdict.items():
+                if isinstance(v, float) or isinstance(v, bool) or isinstance(v, int):
+                    v = torch.tensor([v], device=DEVICE)
+                else:
+                    v = v.to(DEVICE)
 
-        # batch = dict()
-        # for idx in idxs:
-        #     currdict = self.buffer[idx]
-        #     for k, v in currdict.items():
-        #         if isinstance(v, float) or isinstance(v, bool) or isinstance(v, int):
-        #             v = torch.tensor([v], device=DEVICE)
-        #         else:
-        #             v = v.to(DEVICE)
+                if k in batch:
+                    batch[k].append(v)
+                else:
+                    batch[k] = [v]
 
-        #         if k in batch:
-        #             batch[k].append(v)
-        #         else:
-        #             batch[k] = [v]
-
-        # return  {
-        #     k: torch.stack(v)
-        #     for k, v in batch.items()
-        # }
+        return  {
+            k: torch.stack(v)
+            for k, v in batch.items()
+        }
 
     def finish_path(self, action_obj=None):
         """
