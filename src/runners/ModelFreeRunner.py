@@ -134,9 +134,7 @@ class ModelFreeRunner(BaseRunner):
                 t += 1
                 self.agent.deterministic = False
                 action = self.agent.select_action(obs_encoded)
-                obs_encoded_new, reward, done, info = self.env_wrapped.step(
-                    action
-                )
+                obs_encoded_new, reward, done, info = self.env_wrapped.step(action)
 
                 ep_ret += reward
 

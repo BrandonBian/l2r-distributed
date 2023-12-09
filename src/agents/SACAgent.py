@@ -112,10 +112,10 @@ class SACAgent(BaseAgent):
         # from a uniform distribution for better exploration. Afterwards,
         # use the learned policy.
         if self.t > self.steps_to_sample_randomly:
-            a = self.actor_critic.act(obs.to(DEVICE), self.deterministic)
-            if a.shape == ():
+            a = self.actor_critic.act(obs, self.deterministic)
+            if a.nelement() == 1:
                 # In case a is a scalar
-                a = np.array([a])
+                a = a.unsqueeze(0)
             self.record["transition_actor"] = "learner"
         else:
             a = self.action_space.sample()
