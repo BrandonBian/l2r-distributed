@@ -51,8 +51,8 @@ class SACAgent_OpenAI(BaseAgent):
         
     def init_network(self, obs_space, action_space):
         # Create actor-critic module and target networks
-        self.actor_critic = self.actor_critic(obs_space, action_space, **self.ac_kwargs)
-        self.actor_critic_target = deepcopy(self.actor_critic)
+        self.actor_critic = self.actor_critic(obs_space, action_space, **self.ac_kwargs).to(DEVICE)
+        self.actor_critic_target = deepcopy(self.actor_critic).to(DEVICE)
 
         # Freeze target networks with respect to optimizers (only update via polyak averaging)
         for p in self.actor_critic_target.parameters():
