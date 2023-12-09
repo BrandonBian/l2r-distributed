@@ -15,11 +15,11 @@ class ReplayBuffer_OpenAI:
 
     def __init__(self, obs_dim: int, act_dim: int, size: int):
         print("[Replay Buffer Init] ReplayBuffer - OpenAI")
-        self.obs_buf = np.zeros(combined_shape(size, obs_dim), dtype=np.float32)
-        self.obs2_buf = np.zeros(combined_shape(size, obs_dim), dtype=np.float32)
-        self.act_buf = np.zeros(combined_shape(size, act_dim), dtype=np.float32)
-        self.rew_buf = np.zeros(size, dtype=np.float32)
-        self.done_buf = np.zeros(size, dtype=np.float32)
+        self.obs_buf = torch.zeros(combined_shape(size, obs_dim), dtype=torch.float32, device=DEVICE)
+        self.obs2_buf = torch.zeros(combined_shape(size, obs_dim), dtype=torch.float32, device=DEVICE)
+        self.act_buf = torch.zeros(combined_shape(size, act_dim), dtype=torch.float32, device=DEVICE)
+        self.rew_buf = torch.zeros(size, dtype=torch.float32, device=DEVICE)
+        self.done_buf = torch.zeros(size, dtype=torch.float32, device=DEVICE)
         self.ptr, self.size, self.max_size = 0, 0, size
 
     def store(self, obs, act, rew, next_obs, done):
