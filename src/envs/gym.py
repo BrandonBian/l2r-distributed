@@ -25,7 +25,10 @@ class GymEnv:
 
     def step(self, action):
         # NOTE: it seems like OpenAI Gym environment step() must take a numpy action
-        (obs_encoded_new, reward, done, info) = self.env.step(action.cpu().numpy())
+        if isinstance(action, torch.Tensor):
+            action = action.cpu().numpy()
+
+        (obs_encoded_new, reward, done, info) = self.env.step(action)
         return torch.as_tensor(obs_encoded_new, device=DEVICE), reward, done, info
 
     def reset(self, options=None):
