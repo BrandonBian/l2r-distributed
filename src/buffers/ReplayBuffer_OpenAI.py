@@ -22,12 +22,12 @@ class ReplayBuffer_OpenAI:
         self.done_buf = torch.zeros(size, dtype=torch.float32, device=DEVICE)
         self.ptr, self.size, self.max_size = 0, 0, size
 
-    def store(self, obs, act, rew, next_obs, done):
-        self.obs_buf[self.ptr] = obs
-        self.obs2_buf[self.ptr] = next_obs
-        self.act_buf[self.ptr] = act
-        self.rew_buf[self.ptr] = rew
-        self.done_buf[self.ptr] = done
+    def store(self, values):
+        self.obs_buf[self.ptr] = values['obs']
+        self.obs2_buf[self.ptr] = values['next_obs']
+        self.act_buf[self.ptr] = values['act']
+        self.rew_buf[self.ptr] = values['rew']
+        self.done_buf[self.ptr] = values['done']
         self.ptr = (self.ptr+1) % self.max_size
         self.size = min(self.size+1, self.max_size)
 
