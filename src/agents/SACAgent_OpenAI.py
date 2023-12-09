@@ -133,22 +133,6 @@ class SACAgent_OpenAI(BaseAgent):
 
     def save_model(self, path):
         torch.save(self.actor_critic.state_dict(), path)
-    
-    # Set up function for computing SAC pi loss
-    def compute_loss_pi(self, data):
-        o = data['obs']
-        pi, logp_pi = self.actor_critic.pi(o)
-        q1_pi = self.actor_critic.q1(o, pi)
-        q2_pi = self.actor_critic.q2(o, pi)
-        q_pi = torch.min(q1_pi, q2_pi)
-
-        # Entropy-regularized policy loss
-        loss_pi = (self.alpha * logp_pi - q_pi).mean()
-
-        # Useful info for logging
-        pi_info = dict(LogPi=logp_pi.detach().numpy())
-
-        return loss_pi, pi_info
 
     def update(self, data):
         # First run one gradient descent step for Q1 and Q2
