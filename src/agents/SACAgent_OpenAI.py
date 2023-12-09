@@ -93,10 +93,10 @@ class SACAgent_OpenAI(BaseAgent):
         loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
-        q_info = dict(Q1Vals=q1.cpu().numpy(),
-                      Q2Vals=q2.cpu().numpy())
+        # q_info = dict(Q1Vals=q1.cpu().numpy(),
+        #               Q2Vals=q2.cpu().numpy())
 
-        return loss_q, q_info
+        return loss_q, None
 
     # Set up function for computing SAC pi loss
     def compute_loss_pi(self, data):
@@ -110,9 +110,9 @@ class SACAgent_OpenAI(BaseAgent):
         loss_pi = (self.alpha * logp_pi - q_pi).mean()
 
         # Useful info for logging
-        pi_info = dict(LogPi=logp_pi.cpu().numpy())
+        # pi_info = dict(LogPi=logp_pi.cpu().numpy())
 
-        return loss_pi, pi_info
+        return loss_pi, None
 
     def select_action(self, obs, deterministic=False):
         a = self.actor_critic.act(obs, deterministic)
