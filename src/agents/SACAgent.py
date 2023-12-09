@@ -111,20 +111,17 @@ class SACAgent(BaseAgent):
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards,
         # use the learned policy.
-        action_obj = ActionSample()
         if self.t > self.steps_to_sample_randomly:
             a = self.actor_critic.act(obs.to(DEVICE), self.deterministic)
             if a.shape == ():
                 # In case a is a scalar
                 a = np.array([a])
-            action_obj.action = a
             self.record["transition_actor"] = "learner"
         else:
             a = self.action_space.sample()
-            action_obj.action = a
             self.record["transition_actor"] = "random"
         self.t = self.t + 1
-        return action_obj
+        return a
 
     def register_reset(self, obs) -> np.array:
         """

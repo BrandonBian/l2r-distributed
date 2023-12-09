@@ -76,8 +76,8 @@ class WorkerRunner(BaseRunner):
             else:
                 raise NotImplementedError
 
-            action_obj = self.agent.select_action(state_encoded)
-            next_state_encoded, reward, done, info = env.step(action_obj.action)
+            action = self.agent.select_action(state_encoded)
+            next_state_encoded, reward, done, info = env.step(action)
             
             next_state_encoded = torch.tensor(next_state_encoded)
             state_encoded.to(DEVICE)
@@ -88,14 +88,14 @@ class WorkerRunner(BaseRunner):
             self.replay_buffer.store(
                 {
                     "obs": state_encoded,
-                    "act": action_obj,
+                    "act": action,
                     "rew": reward,
                     "next_obs": next_state_encoded,
                     "done": done,
                 }
             )
             if done or t == self.max_episode_length:
-                self.replay_buffer.finish_path(action_obj)
+                self.replay_buffer.finish_path(action)
 
             state_encoded = next_state_encoded
         
