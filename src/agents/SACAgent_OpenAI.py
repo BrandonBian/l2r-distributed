@@ -15,7 +15,6 @@ from torch.optim import Adam
 
 from src.agents.base import BaseAgent
 from src.config.yamlize import yamlize
-from src.utils.utils import ActionSample
 from src.constants import DEVICE
 from src.agents.SAC_core import MLPActorCritic, count_vars
 

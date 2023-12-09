@@ -18,7 +18,7 @@ from torch.optim import Adam
 from src.agents.base import BaseAgent
 from src.config.yamlize import yamlize, create_configurable, NameToSourcePath
 from src.encoders.vae import VAE
-from src.utils.utils import ActionSample, RecordExperience
+from src.utils.utils import RecordExperience
 
 from src.constants import DEVICE
 
