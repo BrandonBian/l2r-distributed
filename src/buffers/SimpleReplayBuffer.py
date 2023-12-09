@@ -34,28 +34,11 @@ class SimpleReplayBuffer:
         return len(self.buffer)
 
     def store(self, values):
-        # pdb.set_trace()
-
-        def convert(arraylike):
-            """Convert from tensor to nparray
-
-            Args:
-                arraylike (Torch.Tensor): Tensor to convert
-
-            Returns:
-                np.array: Converted numpyarray
-            """
-            obs = arraylike
-            if isinstance(obs, torch.Tensor):
-                if obs.requires_grad:
-                    obs = obs.detach()
-                obs = obs.cpu()
-            return obs
 
         if type(values) is dict:
             # convert to deque
-            obs = convert(values["obs"]).squeeze()
-            next_obs = convert(values["next_obs"]).squeeze()
+            obs = values["obs"]
+            next_obs = values["next_obs"]
             action = torch.Tensor(values["act"]) # .detach().cpu().numpy()
             reward = values["rew"]
             done = values["done"]
