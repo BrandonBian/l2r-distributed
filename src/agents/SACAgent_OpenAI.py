@@ -116,9 +116,9 @@ class SACAgent_OpenAI(BaseAgent):
 
     def select_action(self, obs, deterministic=False):
         a = self.actor_critic.act(obs, deterministic)
-        if a.shape == ():
+        if a.nelement() == 1:
             # In case a is a scalar
-            a = np.array([a])
+            a = a.unsqueeze(0)
 
         return a
 

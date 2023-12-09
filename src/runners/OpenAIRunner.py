@@ -88,6 +88,7 @@ class OpenAIRunner():
                 a = self.agent.select_action(o)
             else:
                 a = self.env_wrapped.env.action_space.sample()
+                a = torch.tensor(a, dtype=torch.float32).to(DEVICE)
 
             # Step the env
             o2, r, d, _ = self.env_wrapped.step(a)
