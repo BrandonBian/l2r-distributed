@@ -9,5 +9,5 @@ config:
   max_ep_len: 1600
   update_after: 1000
   update_every: 50
-  batch_size: 512
+  batch_size: 256
   num_test_episodes: 10
