@@ -91,10 +91,14 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         msg = receive_data(self.request)
 
         # Received a replay buffer from a worker
-        # Add this to buff
+        # Add this to buffer queue
         if isinstance(msg, BufferMsg):
             self.server.buffer_queue.put(msg.data)
-            print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {len(self.server.buffer_queue.qsize())}")
+            try:
+                print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {len(self.server.buffer_queue.qsize())}")
+            except:
+                print(msg.data)
+                pass
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
