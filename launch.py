@@ -99,6 +99,9 @@ else:
             section["spec"]["template"]["metadata"]["labels"]["tier"] = worker_name
             section["spec"]["template"]["spec"]["containers"][0]["name"] = worker_name
 
+            # NOTE: for non-L2R (plain Gym environment) workers, do no allocate GPU
+            section["spec"]["template"]["spec"]["containers"][0]["resources"]["limits"]["nvidia.com/gpu"] = 0
+
             # Configure command
             command = section["spec"]["template"]["spec"]["containers"][0]["command"][2]
             
