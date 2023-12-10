@@ -39,7 +39,7 @@ class SimpleReplayBuffer:
             # convert to deque
             obs = values["obs"]
             next_obs = values["next_obs"]
-            # TODO: this should automatically be tensor, but SACAgent.select_action() returns numpy somehow
+            # TODO: this should automatically be tensor, but SACAgent.select_action() keeps giving me numpy
             action = torch.tensor(values["act"], device=DEVICE)
             reward = values["rew"]
             done = values["done"]

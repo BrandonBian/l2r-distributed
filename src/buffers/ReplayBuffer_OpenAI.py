@@ -23,13 +23,31 @@ class ReplayBuffer_OpenAI:
         self.ptr, self.size, self.max_size = 0, 0, size
 
     def store(self, values):
-        self.obs_buf[self.ptr] = values['obs']
-        self.obs2_buf[self.ptr] = values['next_obs']
-        self.act_buf[self.ptr] = values['act']
-        self.rew_buf[self.ptr] = values['rew']
-        self.done_buf[self.ptr] = values['done']
-        self.ptr = (self.ptr+1) % self.max_size
-        self.size = min(self.size+1, self.max_size)
+        original_size = self.size
+        if type(values) is dict:
+            self.obs_buf[self.ptr] = values['obs']
+            self.obs2_buf[self.ptr] = values['next_obs']
+            self.act_buf[self.ptr] = values['act']
+            self.rew_buf[self.ptr] = values['rew']
+            self.done_buf[self.ptr] = values['done']
+            self.ptr = (self.ptr+1) % self.max_size
+            self.size = min(self.size+1, self.max_size)
+        elif type(values) == self.__class__:
+            for idx in range(values.size):
+                self.obs_buf[self.ptr] = values.obs_buf[idx]
+                self.obs2_buf[self.ptr] = values.obs2_buf[idx]
+                self.act_buf[self.ptr] = values.act_buf[idx]
+                self.rew_buf[self.ptr] = values.rew_buf[idx]
+                self.done_buf[self.ptr] = values.done_buf[idx]
+                self.ptr = (self.ptr + 1) % self.max_size
+                self.size = min(self.size + 1, self.max_size)
+        else:
+            print(type(values), self.__class__)
+            raise Exception(
+                "Sorry, invalid input type. Please input dict or buffer of same type"
+            )
+
+        print(f"[ReplayBuffer_OpenAI] Store - size: {original_size} -> {self.size}")
 
     def sample_batch(self, batch_size=32):
         idxs = np.random.randint(0, self.size, size=batch_size)
