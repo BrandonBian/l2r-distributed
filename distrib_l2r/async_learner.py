@@ -94,11 +94,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # Add this to buffer queue
         if isinstance(msg, BufferMsg):
             self.server.buffer_queue.put(msg.data)
-            try:
-                print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {len(self.server.buffer_queue.qsize())}")
-            except:
-                print(msg.data)
-                pass
+            print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {self.server.buffer_queue.qsize()}")
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
@@ -310,7 +306,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
 
                 # Learning steps for the policy
                 count = 0
-                for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
+                for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.batch_size))):
                     batch = self.replay_buffer.sample_batch()
                     self.agent.update(data=batch)
                     count += 1
