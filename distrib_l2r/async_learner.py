@@ -294,11 +294,16 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         """The thread where thread-safe gradient updates occur"""
         if self.paradigm == "dCollect":
             epoch = 0
+            semibuffer_size, buffer_queue_size, replay_buffer_size = None, None, None
+
             while True:
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    print(f"[dCollect Learning Epoch {epoch}]: Sampled from Buffer Queue = {len(semibuffer)} | Buffer Queue become = {self.buffer_queue.qsize()} | Replay Buffer after storing sample = {len(self.replay_buffer)}")
+                    # For logging
+                    semibuffer_size = len(semibuffer)
+                    buffer_queue_size = self.buffer_queue.qsize()
+                    replay_buffer_size = len(self.replay_buffer)
 
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
@@ -311,7 +316,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     count += 1
                     # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
                 
-                print(f"[dCollect Learning Epoch {epoch}]: Update Agent for {count} Steps")
+                print(f"[dCollect Learning Epoch {epoch}]: Buffer Queue = {buffer_queue_size} -- Sampled {semibuffer_size} and Stored to --> Replay Buffer = {replay_buffer_size} -> Update Agent for {count} Steps")
 
                 # Update policy without blocking
                 self.update_agent()
@@ -332,7 +337,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
 
-                    print(f"[dUpdate Learning Epoch {epoch}]: Sampled from Buffer Queue = {len(semibuffer)} | Buffer Queue become = {self.buffer_queue.qsize()} | Replay Buffer after storing sample = {len(self.replay_buffer)}")
+                    print(f"[dUpdate Learning Epoch {epoch}]: Buffer Queue = {self.buffer_queue.qsize()} -- Sampled {len(semibuffer)} and Stored to --> Replay Buffer = {len(self.replay_buffer)}")
 
                 time.sleep(0.5)
                 epoch += 1
