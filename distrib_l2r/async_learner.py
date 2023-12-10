@@ -94,7 +94,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # Add this to buff
         if isinstance(msg, BufferMsg):
             self.server.buffer_queue.put(msg.data)
-            print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {len(self.server.buffer_queue)}")
+            print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {len(self.server.buffer_queue.qsize())}")
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
@@ -299,7 +299,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     semibuffer = self.buffer_queue.get()
 
                     print(f"----- dCollect Learner Learning Epoch {epoch} -----")
-                    print(f"Sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
+                    print(f"Sampled size = {len(semibuffer)} from Buffer Queue of size = {self.buffer_queue.qsize()}, storing to Replay Buffer of size = {len(self.replay_buffer)}")
 
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
