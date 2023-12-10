@@ -32,6 +32,7 @@ if __name__ == "__main__":
     # Configure learner IP (by environment)
     learner_ip = socket.gethostbyname(f"{args.env}-{args.paradigm.lower()}-learner")
     learner_address = (learner_ip, 4444)
+    print(f"Learner IP = {learner_ip}, Learner Address = {learner_address}")
     
     # Configure worker (by training paradigm)
     worker = AsnycWorker(

@@ -50,7 +50,7 @@ metadata:
   labels:
     app.kubernetes.io/name: proxy
 spec:
-  hostname: learner-1
+  hostname: TODO
   nodeSelector:
     nodetype: phortx
   containers:

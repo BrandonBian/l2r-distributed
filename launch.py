@@ -123,6 +123,7 @@ else:
             section["metadata"]["name"] = learner_name
             section["spec"]["containers"][0]["name"] = learner_name
             section["spec"]["containers"][0]["ports"][0]["name"] = port_name
+            section["spec"]["hostname"] = port_name
 
             # Configure command
             command = section["spec"]["containers"][0]["command"][2]
