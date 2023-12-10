@@ -93,21 +93,19 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # Received a replay buffer from a worker
         # Add this to buff
         if isinstance(msg, BufferMsg):
-            logging.info(
-                f"<<< Learner Receiving: [Replay Buffer] | Buffer Size = {len(msg.data)}")
             self.server.buffer_queue.put(msg.data)
+            print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {len(self.server.buffer_queue)}")
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
         elif isinstance(msg, InitMsg):
-            logging.info(f"<<< Learner Receiving: [Init Message]")
+            print(f"<<< Learner Receiving: [Init Message]")
 
         # Received evaluation results from a worker
         # Log to Weights and Biases
         elif isinstance(msg, EvalResultsMsg):
             reward = msg.data["reward"]
-            logging.info(
-                f"<<< Learner Receiving: [Reward] | Reward = {reward}")
+            print(f"<<< Learner Receiving: [Reward] | Reward = {reward}")
             
             try:
                 # L2R
@@ -128,9 +126,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 )
             except:
                 # Non-l2r (Gym)
-                self.server.wandb_logger.log_metric(
-                    msg.data["reward"], 'reward'
-                )
+                self.server.wandb_logger.log_metric(msg.data["reward"], 'reward')
 
         # Received trained parameters from a worker
         # Update current parameter with damping factors - TODO
@@ -139,8 +135,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             current_parameters = {k: v.cpu()
                                   for k, v in self.server.agent.state_dict().items()}
 
-            assert set(current_parameters.keys()) == set(
-                new_parameters.keys()), "Parameters from worker not matching learner's!"
+            assert set(current_parameters.keys()) == set(new_parameters.keys()), "Parameters from worker not matching learner's!"
 
             # Loop through the keys of the dictionaries and update the values of old_dict using the damping formula
             alpha = 0.8
@@ -150,8 +145,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 updated_value = alpha * old_value + (1 - alpha) * new_value
                 current_parameters[key] = updated_value
 
-            logging.info(
-                f"<<< Learner Receiving: [Trained Parameters] | Updating parameters")
+            print(f"<<< Learner Receiving: [Trained Parameters] | Updating parameters")
             
             self.server.agent.load_model(current_parameters)
             self.server.update_agent()
@@ -230,8 +224,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         # main replay buffer
         self.buffer_queue = queue.LifoQueue(300)
 
-        self.wandb_logger = WanDBLogger(
-            api_key=api_key, project_name="l2r", exp_name=exp_name)
+        self.wandb_logger = WanDBLogger(api_key=api_key, project_name="l2r", exp_name=exp_name)
         # Save function, called optionally
         self.save_func = save_func
 
@@ -279,8 +272,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             if TIMING:
                 print(f"Preparation Time = {duration} s")
 
-            logging.info(
-                f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
+            print(f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
             return msg
         else:
             raise NotImplementedError
@@ -306,21 +298,22 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    logging.info(f" --- Epoch {epoch} ---")
-                    logging.info(f" Samples received = {len(semibuffer)}")
-                    logging.info(
-                        f" Replay buffer size = {len(self.replay_buffer)}")
-                    logging.info(
-                        f" Buffers to be processed = {self.buffer_queue.qsize()}")
+                    print(f"----- Agent Learning Epoch {epoch} -----")
+                    print(f"Sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
 
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
 
                 # Learning steps for the policy
+                count = 0
                 for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
                     batch = self.replay_buffer.sample_batch()
                     self.agent.update(data=batch)
+                    count += 1
                     # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
+                
+                print(f"Update agents for {count} steps")
+                print("----------------------------------")
 
                 # Update policy without blocking
                 self.update_agent()
@@ -337,12 +330,11 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    logging.info(
-                        f"--- Learner Processing: Sampled Buffer = {len(semibuffer)} | Replay Buffer = {len(self.replay_buffer)} | Buffer Queue = {self.buffer_queue.qsize()}")
-
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
-                
+
+                    print(f"Learner sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
+
                 time.sleep(0.5)
         else:
             raise NotImplementedError

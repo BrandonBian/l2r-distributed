@@ -47,8 +47,6 @@ class ReplayBuffer_OpenAI:
                 "Sorry, invalid input type. Please input dict or buffer of same type"
             )
 
-        print(f"[ReplayBuffer_OpenAI] Store - size: {original_size} -> {self.size}")
-
     def sample_batch(self, batch_size=32):
         idxs = np.random.randint(0, self.size, size=batch_size)
         batch = dict(obs=self.obs_buf[idxs],
