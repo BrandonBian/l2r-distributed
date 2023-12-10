@@ -298,8 +298,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    print(f"----- dCollect Learner Learning Epoch {epoch} -----")
-                    print(f"Sampled size = {len(semibuffer)} from Buffer Queue of size = {self.buffer_queue.qsize()}, storing to Replay Buffer of size = {len(self.replay_buffer)}")
+                    print(f"[dCollect Learning Epoch {epoch}]: Sampled from Buffer Queue = {len(semibuffer)} | Buffer Queue become = {self.buffer_queue.qsize()} | Replay Buffer after storing sample = {len(self.replay_buffer)}")
 
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
@@ -312,7 +311,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     count += 1
                     # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
                 
-                print(f"Update Agent for {count} Steps")
+                print(f"[dCollect Learning Epoch {epoch}]: Update Agent for {count} Steps")
 
                 # Update policy without blocking
                 self.update_agent()
@@ -324,6 +323,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 epoch += 1
 
         elif self.paradigm == "dUpdate":
+            epoch = 0
             while True:
                 # Sample data from buffer_queue, and put inside replay buffer
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
@@ -332,9 +332,10 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
 
-                    print(f"dUpdate Learner sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
+                    print(f"[dUpdate Learning Epoch {epoch}]: Sampled from Buffer Queue = {len(semibuffer)} | Buffer Queue become = {self.buffer_queue.qsize()} | Replay Buffer after storing sample = {len(self.replay_buffer)}")
 
                 time.sleep(0.5)
+                epoch += 1
         else:
             raise NotImplementedError
 
