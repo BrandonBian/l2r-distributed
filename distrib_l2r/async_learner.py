@@ -337,7 +337,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
 
-                    print(f"[dUpdate Learning Epoch {epoch}]: Buffer Queue = {self.buffer_queue.qsize()} -> Sampled {semibuffer_size} -> Stored to Replay Buffer = {len(self.replay_buffer)}")
+                    print(f"[dUpdate Learning Epoch {epoch}]: Buffer Queue = {self.buffer_queue.qsize()} -> Sampled {len(semibuffer)} -> Stored to Replay Buffer = {len(self.replay_buffer)}")
 
                 time.sleep(0.5)
                 epoch += 1
