@@ -108,7 +108,7 @@ else:
                 prepend = "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
                 command = prepend + command
 
-            command += f" python worker.py --env {RL_env} --paradigm {training_paradigm}"
+            command += f" python worker.py --env {RL_env} --paradigm {training_paradigm} --port {port_name}"
             
             section["spec"]["template"]["spec"]["containers"][0]["command"][2] = command
 
