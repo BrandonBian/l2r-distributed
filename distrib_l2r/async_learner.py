@@ -298,7 +298,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    print(f"----- Agent Learning Epoch {epoch} -----")
+                    print(f"----- dCollect Learner Learning Epoch {epoch} -----")
                     print(f"Sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
 
                     # Add new data to the primary replay buffer
@@ -312,8 +312,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     count += 1
                     # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
                 
-                print(f"Update agents for {count} steps")
-                print("----------------------------------")
+                print(f"Update Agent for {count} Steps")
 
                 # Update policy without blocking
                 self.update_agent()
@@ -333,7 +332,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
 
-                    print(f"Learner sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
+                    print(f"dUpdate Learner sampled {len(semibuffer)} from Buffer Queue of {self.buffer_queue.qsize()}, storing to Replay Buffer of {len(self.replay_buffer)}")
 
                 time.sleep(0.5)
         else:

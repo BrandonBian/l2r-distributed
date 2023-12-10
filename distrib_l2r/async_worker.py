@@ -45,30 +45,28 @@ class AsnycWorker:
         self.env = env
         self.runner = runner
 
-        print("(worker.py) Action Space ==", self.env.action_space)
+        print("[AsyncLearningNode Init] Environment Action Space ==", self.env.action_space)
 
     def work(self) -> None:
         counter = 0
         is_train = True
 
-        logging.info("Sending init message to establish connection")
+        print("Sending init message to establish connection")
         response = send_data(data=InitMsg(), addr=self.learner_address, reply=True)
         policy_id, policy = response.data["policy_id"], response.data["policy"]
-        logging.info("Finish init message, start true communication")
+        print("Finish init message, start true communication")
 
         if self.paradigm == "dUpdate":
             task = response.data["task"]
-            logging.info(f"Worker: [{task}] | Param. Ver. = {policy_id}")
+            print(f"dUpdate Worker: [{task}] | Param. Ver. = {policy_id}")
         
         if self.paradigm == "dUpdate":
             while True:
                 """ Process request, collect data """
                 if task == Task.TRAIN:
-                    parameters = self.train(
-                        policy_weights=policy, batches=response.data["replay_buffer"])
+                    parameters = self.train(policy_weights=policy, batches=response.data["replay_buffer"])
                 else:
-                    buffer, result = self.process(
-                        policy_weights=policy, task=task)
+                    buffer, result = self.process(policy_weights=policy, task=task)
 
                 """ Send response back to learner """
                 if task == Task.COLLECT:
@@ -79,8 +77,7 @@ class AsnycWorker:
                         reply=True
                     )
 
-                    logging.info(
-                        f"Worker: [Task.COLLECT] | Param. Ver. = {policy_id} | Collected Buffer = {len(buffer)}")
+                    print(f"dUpdate Worker: [Task.COLLECT] | Param. Ver. = {policy_id} | Collected Replay Buffer = {len(buffer)}")
 
                 elif task == Task.EVAL:
                     """ Evaluate parameters, send back reward (EvalResultsMsg) """
@@ -91,26 +88,21 @@ class AsnycWorker:
                     )
 
                     reward = result["reward"]
-                    logging.info(
-                        f"Worker: [Task.EVAL] | Param. Ver. = {policy_id} | Reward = {reward}")
+                    print(f"dUpdate Worker: [Task.EVAL] | Param. Ver. = {policy_id} | Eval Reward = {reward}")
 
                 else:
                     """ Train parameters on the obtained replay buffers, send back updated parameters (ParameterMsg) """
-                    response = send_data(
-                        data=ParameterMsg(data=parameters), addr=self.learner_address, reply=True)
+                    response = send_data(data=ParameterMsg(data=parameters), addr=self.learner_address, reply=True)
                     
                     duration = parameters["duration"]
-                    logging.info(
-                        f"Worker: [Task.TRAIN] | Param. Ver. = {policy_id} | Training time = {duration} s")
+                    print(f"dUpdate Worker: [Task.TRAIN] | Param. Ver. = {policy_id} | Training time = {duration} s")
 
                 policy_id, policy, task = response.data["policy_id"], response.data["policy"], response.data["task"]
 
         elif self.paradigm == "dCollect":
             while True:
-                buffer, result = self.collect_data(
-                    policy_weights=policy, is_train=is_train)
-                self.mean_reward = self.mean_reward * \
-                    (0.2) + result["reward"] * 0.8
+                buffer, result = self.collect_data(policy_weights=policy, is_train=is_train)
+                self.mean_reward = self.mean_reward * (0.2) + result["reward"] * 0.8
 
                 if is_train:
                     response = send_data(
@@ -119,21 +111,20 @@ class AsnycWorker:
                         reply=True
                     )
 
-                    logging.info(f" --- Iteration {counter}: Training ---")
-                    logging.info(f" >> reward: {self.mean_reward}")
-                    logging.info(f" >> buffer size (sent): {len(buffer)}")
+                    print(f"----- dCollect Worker Iteration {counter}: Training -----")
+                    print(f">> Train Reward (not sent): {self.mean_reward}")
+                    print(f">> Buffer Size (sent): {len(buffer)}")
 
                 else:
-
                     response = send_data(
                         data=EvalResultsMsg(data=result),
                         addr=self.learner_address,
                         reply=True,
                     )
 
-                    logging.info(f" --- Iteration {counter}: Inference ---")
-                    logging.info(f" >> reward (sent): {self.mean_reward}")
-                    logging.info(f" >> buffer size: {len(buffer)}")
+                    print(f"----- dCollect Worker Iteration {counter}: Evaluation -----")
+                    print(f">> Eval Reward (sent): {self.mean_reward}")
+                    print(f">> Buffer Size (not sent): {len(buffer)}")
 
                 is_train = response.data["is_train"]
                 policy_id, policy = response.data["policy_id"], response.data["policy"]
