@@ -70,35 +70,39 @@ class AsnycWorker:
                     buffer, result = self.process(policy_weights=policy, task=task)
 
                 """ Send response back to learner """
-                if task == Task.COLLECT:
-                    """ Collect data, send back replay buffer (BufferMsg) """
-                    response = send_data(
-                        data=BufferMsg(data=buffer),
-                        addr=self.learner_address,
-                        reply=True
-                    )
+                try:
+                    if task == Task.COLLECT:
+                        """ Collect data, send back replay buffer (BufferMsg) """
+                        response = send_data(
+                            data=BufferMsg(data=buffer),
+                            addr=self.learner_address,
+                            reply=True
+                        )
 
-                    print(f"dUpdate Worker: [Task.COLLECT] | Param. Ver. = {policy_id} | Collected Replay Buffer = {len(buffer)}")
+                        print(f"dUpdate Worker: [Task.COLLECT] | Param. Ver. = {policy_id} | Collected Replay Buffer = {len(buffer)}")
 
-                elif task == Task.EVAL:
-                    """ Evaluate parameters, send back reward (EvalResultsMsg) """
-                    response = send_data(
-                        data=EvalResultsMsg(data=result),
-                        addr=self.learner_address,
-                        reply=True,
-                    )
+                    elif task == Task.EVAL:
+                        """ Evaluate parameters, send back reward (EvalResultsMsg) """
+                        response = send_data(
+                            data=EvalResultsMsg(data=result),
+                            addr=self.learner_address,
+                            reply=True,
+                        )
 
-                    reward = result["reward"]
-                    print(f"dUpdate Worker: [Task.EVAL] | Param. Ver. = {policy_id} | Eval Reward = {reward}")
+                        reward = result["reward"]
+                        print(f"dUpdate Worker: [Task.EVAL] | Param. Ver. = {policy_id} | Eval Reward = {reward}")
 
-                else:
-                    """ Train parameters on the obtained replay buffers, send back updated parameters (ParameterMsg) """
-                    response = send_data(data=ParameterMsg(data=parameters), addr=self.learner_address, reply=True)
-                    
-                    duration = parameters["duration"]
-                    print(f"dUpdate Worker: [Task.TRAIN] | Param. Ver. = {policy_id} | Training time = {duration} s")
+                    else:
+                        """ Train parameters on the obtained replay buffers, send back updated parameters (ParameterMsg) """
+                        response = send_data(data=ParameterMsg(data=parameters), addr=self.learner_address, reply=True)
+                        
+                        duration = parameters["duration"]
+                        print(f"dUpdate Worker: [Task.TRAIN] | Param. Ver. = {policy_id} | Training time = {duration} s")
 
-                policy_id, policy, task = response.data["policy_id"], response.data["policy"], response.data["task"]
+                    policy_id, policy, task = response.data["policy_id"], response.data["policy"], response.data["task"]
+                except:
+                    print("[Warning] dUpdate - Worker failed to send data to learner, waiting 30 seconds and re-trying!")
+                    time.sleep(30)
 
         elif self.paradigm == "dCollect":
             while True:
@@ -129,7 +133,7 @@ class AsnycWorker:
                         print(f">> Buffer Size (not sent): {len(buffer)}")
 
                 except:
-                    print("[Warning] Worker failed to send data to learner, waiting 30 seconds and re-trying!")
+                    print("[Warning] Train Task - Worker failed to send data to learner, waiting 30 seconds and re-trying!")
                     time.sleep(30)
                     continue
 
