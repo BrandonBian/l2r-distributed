@@ -9,6 +9,7 @@ from typing import Dict
 from typing import Optional
 from typing import Tuple
 import os
+import time
 
 from gym import Wrapper
 import gym
@@ -104,27 +105,33 @@ class AsnycWorker:
                 buffer, result = self.collect_data(policy_weights=policy, is_train=is_train)
                 self.mean_reward = self.mean_reward * (0.2) + result["reward"] * 0.8
 
-                if is_train:
-                    response = send_data(
-                        data=BufferMsg(data=buffer),
-                        addr=self.learner_address,
-                        reply=True
-                    )
+                try:
+                    if is_train:
+                        response = send_data(
+                            data=BufferMsg(data=buffer),
+                            addr=self.learner_address,
+                            reply=True
+                        )
 
-                    print(f"----- dCollect Worker Iteration {counter}: Training -----")
-                    print(f">> Train Reward (not sent): {self.mean_reward}")
-                    print(f">> Buffer Size (sent): {len(buffer)}")
+                        print(f"----- dCollect Worker Iteration {counter}: Training -----")
+                        print(f">> Train Reward (not sent): {self.mean_reward}")
+                        print(f">> Buffer Size (sent): {len(buffer)}")
 
-                else:
-                    response = send_data(
-                        data=EvalResultsMsg(data=result),
-                        addr=self.learner_address,
-                        reply=True,
-                    )
+                    else:
+                        response = send_data(
+                            data=EvalResultsMsg(data=result),
+                            addr=self.learner_address,
+                            reply=True,
+                        )
 
-                    print(f"----- dCollect Worker Iteration {counter}: Evaluation -----")
-                    print(f">> Eval Reward (sent): {self.mean_reward}")
-                    print(f">> Buffer Size (not sent): {len(buffer)}")
+                        print(f"----- dCollect Worker Iteration {counter}: Evaluation -----")
+                        print(f">> Eval Reward (sent): {self.mean_reward}")
+                        print(f">> Buffer Size (not sent): {len(buffer)}")
+
+                except:
+                    print("[Warning] Worker failed to send data to learner, waiting 5 seconds and re-trying!")
+                    time.sleep(5)
+                    continue
 
                 is_train = response.data["is_train"]
                 policy_id, policy = response.data["policy_id"], response.data["policy"]
