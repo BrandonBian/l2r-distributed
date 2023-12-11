@@ -129,8 +129,8 @@ class AsnycWorker:
                         print(f">> Buffer Size (not sent): {len(buffer)}")
 
                 except:
-                    print("[Warning] Worker failed to send data to learner, waiting 5 seconds and re-trying!")
-                    time.sleep(5)
+                    print("[Warning] Worker failed to send data to learner, waiting 30 seconds and re-trying!")
+                    time.sleep(30)
                     continue
 
                 is_train = response.data["is_train"]
