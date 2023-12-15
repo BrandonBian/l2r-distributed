@@ -1,17 +1,22 @@
 # Learn-to-Race: Distributed RL with Optimizations
 
 ## Progress
-| RL Environments                           | Training Paradigm      | YAML Source File             |
-| ----------------------------------------- | ---------------------- | ---------------------------- |
-| Mountain Car (`MountainCarContinuous-v0`) | Distributed Collection | `mcar-dCollect.yaml`   |
-| Mountain Car (`MountainCarContinuous-v0`) | Distributed Update     | `mcar-dUpdate.yaml`    |
-| Mountain Car (`MountainCarContinuous-v0`) | Sequential             | `mcar-sequential.yaml`       |
-| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Collection | `walker-dCollect.yaml` |
-| Bipedal Walker (`BipedalWalker-v3`)       | Distributed Update     | `walker-dUpdate.yaml`  |
-| Bipedal Walker (`BipedalWalker-v3`)       | Sequential             | `walker-sequential.yaml`     |
-| Learn-to-race                             | Distributed Collection | `l2r-dCollect.yaml`    |
-| Learn-to-race                             | Distributed Update     | `l2r-dUpdate.yaml`     |
-| Learn-to-race                             | Sequential             | `l2r-sequential.yaml`        |
+- Every configuration is using **SAC agent** by default (Non-SAC configuration is not tested)
+- For environments marked with "**OpenAI**", they are using implementation of SAC agents, buffers, and runners from [vanilla OpenAI SpinningUp repository](https://github.com/openai/spinningup/tree/master/spinup/algos/pytorch/sac). For environments not marked, they are using implementation from prior iterations of this project, and may contain latent issues or deprecations. 
+- **NOTE**: a table of all **OpenAI Gym Environments** can be found [HERE](https://github.com/openai/gym/wiki/Table-of-environments). Our implementation only supports environments with `BOX(x,)` for both observation and action spaces.
+  - Mountain Car: `MountainCarContinuous-v0`
+  - Bipedal Walker: `BipedalWalker-v2`
+  - Lunar Lander: `LunarLanderContinuous-v2`
+- **NOTE**: &#10004; means convergence, &#10003; means non-convergence. If no checkmark, not currently implemented.
+
+
+| RL Environments         | Sequential                   | Distributed Collection | Distributed Update |
+| ----------------------- | ---------------------------- | ---------------------- | ------------------ |
+| Mountain Car            | &#10004;                     | &#10004;               | &#10004;           |
+| Bipedal Walker          | &#10003;                     | &#10003;               | &#10003;           |
+| Bipedal Walker - OpenAI | &#10003;                     |                        |                    |
+| Lunar Lander - OpenAI   | &#10004;                     |                        |                    |
+| Learn-to-race           | &#10004; (rough convergence) | &#10003;               | &#10003;           |
 
 
 ## Basic Kubernetes control commands
@@ -32,7 +37,7 @@ kubectl exec -it <pod-name> -- /bin/bash
 # Delete all pods
 kubectl delete all --all
 
-# Delete pod (force delete)
+# Delete pod (force delete, NOT RECOMMENDED since resource may be persisting!)
 kubectl delete pod <pod-name> --force --grace-period=0
 ```
 
@@ -47,7 +52,7 @@ python3 server.py 173e38ab5f2f2d96c260f57c989b4d068b64fb8a
 self.wandb_logger = WanDBLogger(api_key=api_key, project_name="l2r")
 ```
 
-## Running sequential (non-distributed) L2R with ArrivalSim - within Phoebe Kubernetes pods
+## Running sequential (non-distributed) L2R with ArrivalSim - manually within Phoebe Kubernetes pods
 ```bash
 # Start kubernetes worker pod (fresh GPU environment)
 kubectl create -f l2r-sequential.yaml

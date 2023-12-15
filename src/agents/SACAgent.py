@@ -18,7 +18,7 @@ from torch.optim import Adam
 from src.agents.base import BaseAgent
 from src.config.yamlize import yamlize, create_configurable, NameToSourcePath
 from src.encoders.vae import VAE
-from src.utils.utils import ActionSample, RecordExperience
+from src.utils.utils import RecordExperience
 
 from src.constants import DEVICE
 
@@ -49,6 +49,7 @@ class SACAgent(BaseAgent):
         lr: float,
     ):
         super(SACAgent, self).__init__()
+        print("[Agent Init] SACAgent")
 
         self.steps_to_sample_randomly = steps_to_sample_randomly
         self.record_dir = record_dir
@@ -110,20 +111,17 @@ class SACAgent(BaseAgent):
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards,
         # use the learned policy.
-        action_obj = ActionSample()
         if self.t > self.steps_to_sample_randomly:
-            a = self.actor_critic.act(obs.to(DEVICE), self.deterministic)
-            if a.shape == ():
+            a = self.actor_critic.act(obs, self.deterministic)
+            if a.nelement() == 1:
                 # In case a is a scalar
-                a = np.array([a])
-            action_obj.action = a
+                a = a.unsqueeze(0)
             self.record["transition_actor"] = "learner"
         else:
             a = self.action_space.sample()
-            action_obj.action = a
             self.record["transition_actor"] = "random"
         self.t = self.t + 1
-        return action_obj
+        return a
 
     def register_reset(self, obs) -> np.array:
         """
@@ -145,6 +143,10 @@ class SACAgent(BaseAgent):
 
     def save_model(self, path):
         torch.save(self.actor_critic.state_dict(), path)
+
+    def init_network(self, obs_space, action_space):
+        # For compatibility with SACAgent_OpenAI
+        pass
 
     # def compute_loss_q(self, data):
 
@@ -230,7 +232,7 @@ class SACAgent(BaseAgent):
             q1_pi_targ = self.actor_critic_target.q1(o2, pi)
             q2_pi_targ = self.actor_critic_target.q2(o2, pi)
             q_pi_targ = torch.min(q1_pi_targ, q2_pi_targ)
-            backup = r + self.gamma * (1 - d) * (q_pi_targ - self.alpha * logp_pi)
+            backup = r + self.gamma * (1 - d.float()) * (q_pi_targ - self.alpha * logp_pi)
 
         q1 = self.actor_critic.q1(o, a)
         q2 = self.actor_critic.q2(o, a)

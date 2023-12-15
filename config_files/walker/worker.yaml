@@ -1,0 +1,6 @@
+name: WorkerRunner
+config:
+  agent_config_path: "config_files/walker/agent.yaml"
+  buffer_config_path: "config_files/walker/buffer.yaml"
+  env_config_path: "config_files/walker/env.yaml"
+  max_episode_length: 50000 # max_ep_len

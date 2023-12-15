@@ -6,8 +6,6 @@ import wandb
 from src.loggers.WanDBLogger import WanDBLogger
 from src.runners.base import BaseRunner
 from src.utils.envwrapper import EnvContainer
-from src.loggers.TensorboardLogger import TensorboardLogger
-from src.loggers.FileLogger import FileLogger
 
 from src.config.yamlize import create_configurable, NameToSourcePath, yamlize
 from src.constants import DEVICE
@@ -58,6 +56,7 @@ class ModelFreeRunner(BaseRunner):
             max_episode_length (int): Maximum episode length ( BAD PARAM / BUGGY. )
         """
         super().__init__()
+        print("[Runner Init] ModelFreeRunner")
         # Moved initialzation of env to run to allow for yamlization of this class.
         # This would allow a common runner for all model-free approaches
 
@@ -83,14 +82,6 @@ class ModelFreeRunner(BaseRunner):
         self.agent = create_configurable(
             agent_config_path, NameToSourcePath.agent)
 
-        # LOGGER Declaration
-        self.tb_logger_obj = TensorboardLogger(
-            self.model_save_dir, self.experiment_name
-        )
-        self.file_logger = FileLogger(
-            self.model_save_dir, self.experiment_name)
-        self.file_logger.log_obj.info("Using random seed: {}".format(0))
-
         # BUFFER Declaration
         if not self.resume_training:
             self.replay_buffer = create_configurable(
@@ -104,9 +95,7 @@ class ModelFreeRunner(BaseRunner):
             with open(self.experiment_state_path, "r") as openfile:
                 json_object = openfile.readline()
             running_vars = jsonpickle.decode(json_object)
-            self.file_logger.log(
-                f"running_vars: {running_vars}, {type(running_vars)}")
-            # self.replay_buffer = old_runner_obj.replay_buffer
+
             self.best_ret = running_vars["current_best_ret"]
             self.last_saved_episode = running_vars["last_saved_episode"]
             self.replay_buffer = running_vars["buffer"]
@@ -114,13 +103,6 @@ class ModelFreeRunner(BaseRunner):
 
         self.env_wrapped = create_configurable(
             env_config_path, NameToSourcePath.environment)
-
-        # WANDB Declaration
-        """self.wandb_logger = None
-        if self.api_key:
-            self.wandb_logger = WanDBLogger(
-                api_key=self.api_key, project_name="test-project"
-            )"""
 
     def run(self, api_key: str, exp_name: str):
         """Train an agent, with our given parameters, on the environment in question.
@@ -135,39 +117,38 @@ class ModelFreeRunner(BaseRunner):
             self.wandb_logger = WanDBLogger(
                 api_key=api_key, project_name="l2r", exp_name=exp_name
             )
+
         t = 0
         start_idx = self.last_saved_episode
-        for ep_number in range(start_idx + 1, self.num_run_episodes + 1):
+        train_timer = time.time()
 
+        for ep_number in range(start_idx + 1, self.num_run_episodes + 1):
             done = False
 
             obs_encoded = self.env_wrapped.reset(options={"random_pos": True})
 
             ep_ret = 0
-            total_reward = 0
             info = None
+
             while not done:
                 t += 1
                 self.agent.deterministic = False
-                action_obj = self.agent.select_action(obs_encoded)
-                obs_encoded_new, reward, done, info = self.env_wrapped.step(
-                    action_obj.action
-                )
+                action = self.agent.select_action(obs_encoded)
+                obs_encoded_new, reward, done, info = self.env_wrapped.step(action)
 
                 ep_ret += reward
 
-                # self.file_logger.log(f"reward: {reward}")
                 self.replay_buffer.store(
                     {
                         "obs": obs_encoded,
-                        "act": action_obj,
+                        "act": action,
                         "rew": reward,
                         "next_obs": obs_encoded_new,
                         "done": done,
                     }
                 )
                 if done or t == self.max_episode_length:
-                    self.replay_buffer.finish_path(action_obj)
+                    self.replay_buffer.finish_path(action)
 
                 obs_encoded = obs_encoded_new
                 if (t >= self.update_model_after) and (
@@ -178,10 +159,7 @@ class ModelFreeRunner(BaseRunner):
                         self.agent.update(data=batch)
 
             if ep_number % self.eval_every == 0:
-                self.file_logger.log(
-                    f"Episode Number before eval: {ep_number}")
                 eval_ret = self.eval()
-                self.file_logger.log(f"Episode Number after eval: {ep_number}")
                 if eval_ret > self.best_eval_ret:
                     self.best_eval_ret = eval_ret
 
@@ -213,20 +191,17 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
-                    print("[Train Reward]:", ep_ret)
+                    train_duration = time.time() - train_timer
+                    train_timer = time.time()
+
                     self.wandb_logger.log(
                         {
-                            "reward": ep_ret,
+                            "Episode Reward": ep_ret,
+                            "Episode Duration": train_duration
                         }
                     )
 
-            self.file_logger.log(
-                f"Episode Number after WanDB call: {ep_number}")
-            self.file_logger.log(f"info: {info}")
-            self.file_logger.log(
-                f"Episode {ep_number}: Current return: {ep_ret}, Previous best return: {self.best_ret}"
-            )
-            self.checkpoint_model(ep_ret, ep_number)
+            # self.checkpoint_model(ep_ret, ep_number)
 
     def eval(self):
         """Evaluate model on the evaluation environment, using a deterministic agent if possible.
@@ -237,7 +212,6 @@ class ModelFreeRunner(BaseRunner):
         Returns:
             float: The max reward for each test session.
         """
-        print(">> Evaluation:")
         val_ep_rets = []
 
         # Not implemented for logging multiple test episodes
@@ -262,13 +236,13 @@ class ModelFreeRunner(BaseRunner):
                 # Take deterministic actions at test time
                 self.agent.deterministic = True
                 self.t = 1e6
-                eval_action_obj = self.agent.select_action(eval_obs_encoded)
+                eval_action = self.agent.select_action(eval_obs_encoded)
                 (
                     eval_obs_encoded_new,
                     eval_reward,
                     eval_done,
                     eval_info,
-                ) = self.env_wrapped.step(eval_action_obj.action)
+                ) = self.env_wrapped.step(eval_action)
 
                 # Check that the camera is turned on
                 eval_ep_ret += eval_reward
@@ -278,32 +252,7 @@ class ModelFreeRunner(BaseRunner):
                 eval_obs_encoded = eval_obs_encoded_new
                 t_eval += 1
 
-            self.file_logger.log(f"[eval episode] Episode: {j} - {eval_info}")
-
             val_ep_rets.append(eval_ep_ret)
-            # self.tb_logger_obj.log(
-            #     {
-            #         "val/episodic_return": eval_ep_ret,
-            #         "val/ep_n_steps": eval_n_val_steps,
-            #         "val/ep_pct_complete": eval_info["metrics"]["pct_complete"],
-            #         "val/ep_total_time": eval_info["metrics"]["total_time"],
-            #         "val/ep_total_distance": eval_info["metrics"]["total_distance"],
-            #         "val/ep_avg_speed": eval_info["metrics"]["average_speed_kph"],
-            #         "val/ep_avg_disp_err": eval_info["metrics"][
-            #             "average_displacement_error"
-            #         ],
-            #         "val/ep_traj_efficiency": eval_info["metrics"][
-            #             "trajectory_efficiency"
-            #         ],
-            #         "val/ep_traj_admissibility": eval_info["metrics"][
-            #             "trajectory_admissibility"
-            #         ],
-            #         "val/movement_smoothness": eval_info["metrics"][
-            #             "movement_smoothness"
-            #         ],
-            #     },
-            #     eval_n_val_steps,
-            # )
 
             # TODO: revise try-except
             if self.wandb_logger:
@@ -339,15 +288,11 @@ class ModelFreeRunner(BaseRunner):
                     )
                 except:
                     # Non-L2R
-                    print("[Eval reward]:", eval_ep_ret)
                     self.wandb_logger.log(
                         {
-                            "Eval reward": eval_ep_ret,
+                            "Eval Reward": eval_ep_ret,
                         }
                     )
-
-            # TODO: add back - info no longer contains "pct_complete"
-            # self.agent.update_best_pct_complete(info)
 
         return max(val_ep_rets)
 
@@ -364,8 +309,7 @@ class ModelFreeRunner(BaseRunner):
             self.best_ret = max(ep_ret, self.best_ret)
             save_path = f"{self.model_save_dir}/{self.experiment_name}/best_{self.experiment_name}_episode_{ep_number}.statedict"
             self.agent.save_model(save_path)
-            self.file_logger.log(f"New model saved! Saving to: {save_path}")
-            self.save_experiment_state(ep_number)
+            # self.save_experiment_state(ep_number)
 
     def save_experiment_state(self, ep_number):
         """Save running variables for experiment state resuming.

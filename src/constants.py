@@ -4,7 +4,7 @@ from enum import Enum
 
 # Make cpu as torch.
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-print("DEVICE: ", DEVICE)
+print("[Device Init]:", DEVICE)
 
 class Task(Enum):
     # Worker performs training (returns: parameters)

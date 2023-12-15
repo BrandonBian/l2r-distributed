@@ -23,6 +23,7 @@ class SimpleReplayBuffer:
             size (int): Buffer size
             batch_size (int): Batch size
         """
+        print("[Replay Buffer Init] SimpleReplayBuffer")
         self.max_size = size
         self.obs_dim = obs_dim
         self.act_dim = act_dim
@@ -33,29 +34,13 @@ class SimpleReplayBuffer:
         return len(self.buffer)
 
     def store(self, values):
-        # pdb.set_trace()
-
-        def convert(arraylike):
-            """Convert from tensor to nparray
-
-            Args:
-                arraylike (Torch.Tensor): Tensor to convert
-
-            Returns:
-                np.array: Converted numpyarray
-            """
-            obs = arraylike
-            if isinstance(obs, torch.Tensor):
-                if obs.requires_grad:
-                    obs = obs.detach()
-                obs = obs.cpu()
-            return obs
 
         if type(values) is dict:
             # convert to deque
-            obs = convert(values["obs"]).squeeze()
-            next_obs = convert(values["next_obs"]).squeeze()
-            action = torch.Tensor(values["act"].action) # .detach().cpu().numpy()
+            obs = values["obs"]
+            next_obs = values["next_obs"]
+            # TODO: this should automatically be tensor, but SACAgent.select_action() keeps giving me numpy
+            action = torch.tensor(values["act"], device=DEVICE)
             reward = values["rew"]
             done = values["done"]
             currdict = {
@@ -93,19 +78,18 @@ class SimpleReplayBuffer:
         for idx in idxs:
             currdict = self.buffer[idx]
             for k, v in currdict.items():
-                if isinstance(v, float):
-                    v  = torch.Tensor([v])
-                if isinstance(v, bool):
-                    v  = torch.Tensor([v])
-                if isinstance(v, int):
-                    v = torch.Tensor([v])
+                if isinstance(v, float) or isinstance(v, bool) or isinstance(v, int):
+                    v = torch.tensor([v], device=DEVICE)
+                else:
+                    v = v.to(DEVICE)
+
                 if k in batch:
                     batch[k].append(v)
                 else:
                     batch[k] = [v]
 
         return  {
-            k: torch.stack(v).to(DEVICE)
+            k: torch.stack(v)
             for k, v in batch.items()
         }
 

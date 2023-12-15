@@ -91,23 +91,21 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         msg = receive_data(self.request)
 
         # Received a replay buffer from a worker
-        # Add this to buff
+        # Add this to buffer queue
         if isinstance(msg, BufferMsg):
-            logging.info(
-                f"<<< Learner Receiving: [Replay Buffer] | Buffer Size = {len(msg.data)}")
             self.server.buffer_queue.put(msg.data)
+            print(f"<<< Learner Receiving: [Replay Buffer] of size = {len(msg.data)} | Buffer Queue Size = {self.server.buffer_queue.qsize()}")
 
         # Received an init message from a worker
         # Immediately reply with the most up-to-date policy
         elif isinstance(msg, InitMsg):
-            logging.info(f"<<< Learner Receiving: [Init Message]")
+            print(f"<<< Learner Receiving: [Init Message]")
 
         # Received evaluation results from a worker
         # Log to Weights and Biases
         elif isinstance(msg, EvalResultsMsg):
             reward = msg.data["reward"]
-            logging.info(
-                f"<<< Learner Receiving: [Reward] | Reward = {reward}")
+            print(f"<<< Learner Receiving: [Reward] | Reward = {reward}")
             
             try:
                 # L2R
@@ -128,9 +126,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 )
             except:
                 # Non-l2r (Gym)
-                self.server.wandb_logger.log_metric(
-                    msg.data["reward"], 'reward'
-                )
+                self.server.wandb_logger.log_metric(msg.data["reward"], 'reward')
 
         # Received trained parameters from a worker
         # Update current parameter with damping factors - TODO
@@ -139,8 +135,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             current_parameters = {k: v.cpu()
                                   for k, v in self.server.agent.state_dict().items()}
 
-            assert set(current_parameters.keys()) == set(
-                new_parameters.keys()), "Parameters from worker not matching learner's!"
+            assert set(current_parameters.keys()) == set(new_parameters.keys()), "Parameters from worker not matching learner's!"
 
             # Loop through the keys of the dictionaries and update the values of old_dict using the damping formula
             alpha = 0.8
@@ -150,8 +145,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 updated_value = alpha * old_value + (1 - alpha) * new_value
                 current_parameters[key] = updated_value
 
-            logging.info(
-                f"<<< Learner Receiving: [Trained Parameters] | Updating parameters")
+            print(f"<<< Learner Receiving: [Trained Parameters] | Updating parameters")
             
             self.server.agent.load_model(current_parameters)
             self.server.update_agent()
@@ -183,19 +177,20 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
 
     def __init__(
             self,
-            agent: BaseAgent,
+            agent,
+            replay_buffer,
+            env_wrapped,
             update_steps: int = 10,
-            batch_size: int = 128,  # Originally 128
-            epochs: int = 500,  # Originally 500
-            buffer_size: int = 1_000_000,  # Originally 1M
+            batch_size: int = 128,
+            epochs: int = 500,
             server_address: Tuple[str, int] = ("0.0.0.0", 4444),
             eval_prob: float = 0.20,
             save_func: Optional[Callable] = None,
             api_key: str = "",
             exp_name: str = "Undefined Distributed Run",
-            env_name: Optional[str] = None,
             paradigm: Optional[str] = None
     ) -> None:
+        print("[AsyncLearningNode Init] Paradigm =", paradigm)
         self.numThreads = 5  # Hardcode for now
         super().__init__(server_address, ThreadedTCPRequestHandler)
 
@@ -205,26 +200,17 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         self.eval_prob = eval_prob
         self.paradigm = paradigm
 
-        # Create a replay buffer
-        self.buffer_size = buffer_size
-        if env_name == "mcar":
-            self.replay_buffer = create_configurable(
-                "config_files/async_sac_mcar/buffer.yaml", NameToSourcePath.buffer
-            )
-        elif env_name == "walker":
-            self.replay_buffer = create_configurable(
-                "config_files/async_sac_walker/buffer.yaml", NameToSourcePath.buffer
-            )
-        elif env_name == "l2r":
-            self.replay_buffer = create_configurable(
-                "config_files/async_sac_l2r/buffer.yaml", NameToSourcePath.buffer
-            )
-        else:
-            raise NotImplementedError
+        self.replay_buffer = replay_buffer
 
         # Initial policy to use
         self.agent = agent
         self.agent_id = 1
+
+        # Initialize agent
+        self.agent.init_network(
+            obs_space=env_wrapped.env.observation_space,
+            action_space=env_wrapped.env.action_space,
+        )
 
         # The bytes of the policy to reply to requests with
         self.updated_agent = {k: v.cpu()
@@ -238,8 +224,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         # main replay buffer
         self.buffer_queue = queue.LifoQueue(300)
 
-        self.wandb_logger = WanDBLogger(
-            api_key=api_key, project_name="l2r", exp_name=exp_name)
+        self.wandb_logger = WanDBLogger(api_key=api_key, project_name="l2r", exp_name=exp_name)
         # Save function, called optionally
         self.save_func = save_func
 
@@ -287,8 +272,7 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
             if TIMING:
                 print(f"Preparation Time = {duration} s")
 
-            logging.info(
-                f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
+            print(f">>> Learner Sending: [{task}] | Param. Ver. = {self.agent_id}")
             return msg
         else:
             raise NotImplementedError
@@ -310,25 +294,29 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
         """The thread where thread-safe gradient updates occur"""
         if self.paradigm == "dCollect":
             epoch = 0
+            semibuffer_size, buffer_queue_size, replay_buffer_size = None, None, None
+
             while True:
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    logging.info(f" --- Epoch {epoch} ---")
-                    logging.info(f" Samples received = {len(semibuffer)}")
-                    logging.info(
-                        f" Replay buffer size = {len(self.replay_buffer)}")
-                    logging.info(
-                        f" Buffers to be processed = {self.buffer_queue.qsize()}")
+                    # For logging
+                    semibuffer_size = len(semibuffer)
+                    buffer_queue_size = self.buffer_queue.qsize()
+                    replay_buffer_size = len(self.replay_buffer)
 
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
 
                 # Learning steps for the policy
-                for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.replay_buffer.batch_size))):
+                count = 0
+                for _ in range(max(1, min(self.update_steps, len(self.replay_buffer) // self.batch_size))):
                     batch = self.replay_buffer.sample_batch()
                     self.agent.update(data=batch)
+                    count += 1
                     # print(next(self.agent.actor_critic.policy.mu_layer.parameters()))
+                
+                print(f"[dCollect Learning Epoch {epoch}]: Buffer Queue = {buffer_queue_size} -> Sampled {semibuffer_size} -> Stored to Replay Buffer = {replay_buffer_size} -> Update Agent for {count} Steps")
 
                 # Update policy without blocking
                 self.update_agent()
@@ -340,18 +328,19 @@ class AsyncLearningNode(ThreadPoolMixIn, socketserver.TCPServer):
                 epoch += 1
 
         elif self.paradigm == "dUpdate":
+            epoch = 0
             while True:
                 # Sample data from buffer_queue, and put inside replay buffer
                 if not self.buffer_queue.empty() or len(self.replay_buffer) == 0:
                     semibuffer = self.buffer_queue.get()
 
-                    logging.info(
-                        f"--- Learner Processing: Sampled Buffer = {len(semibuffer)} | Replay Buffer = {len(self.replay_buffer)} | Buffer Queue = {self.buffer_queue.qsize()}")
-
                     # Add new data to the primary replay buffer
                     self.replay_buffer.store(semibuffer)
-                
+
+                    print(f"[dUpdate Learning Epoch {epoch}]: Buffer Queue = {self.buffer_queue.qsize()} -> Sampled {len(semibuffer)} -> Stored to Replay Buffer = {len(self.replay_buffer)}")
+
                 time.sleep(0.5)
+                epoch += 1
         else:
             raise NotImplementedError
 

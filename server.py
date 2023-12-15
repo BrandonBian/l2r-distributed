@@ -1,6 +1,5 @@
 from src.config.yamlize import NameToSourcePath, create_configurable
 import threading
-import sys
 import argparse
 
 from distrib_l2r.async_learner import AsyncLearningNode
@@ -11,14 +10,12 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--env",
-        choices=["l2r", "mcar", "walker"],
-        help="Select the environment ('l2r', 'mcar', or 'walker')."
+        choices=["l2r", "mcar", "walker", "walker-openai", "lander-openai"],
     )
 
     parser.add_argument(
         "--paradigm",
         choices=["dCollect", "dUpdate"],
-        help="Select the distributed training paradigm ('dCollect', 'dUpdate')."
     )
 
     parser.add_argument(
@@ -41,12 +38,11 @@ if __name__ == "__main__":
     # NOTE: mcar -> https://mgoulao.github.io/gym-docs/environments/classic_control/mountain_car_continuous/
                 
     learner = AsyncLearningNode(
-        agent=create_configurable(
-            f"config_files/async_sac_{args.env}/agent.yaml", NameToSourcePath.agent
-        ),
+        agent=create_configurable(f"config_files/{args.env}/agent.yaml", NameToSourcePath.agent),
+        replay_buffer=create_configurable(f"config_files/{args.env}/buffer.yaml", NameToSourcePath.buffer),
+        env_wrapped=create_configurable(f"config_files/{args.env}/env.yaml", NameToSourcePath.environment),
         api_key=args.wandb_apikey,
         exp_name=args.exp_name,
-        env_name=args.env,
         paradigm=args.paradigm
     )
 

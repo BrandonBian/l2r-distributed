@@ -1,0 +1,5 @@
+name: ReplayBuffer_OpenAI
+config:
+  size: 1_000_000
+  obs_dim: 8
+  act_dim: 2

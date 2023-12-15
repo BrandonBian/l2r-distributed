@@ -20,6 +20,7 @@ class WorkerRunner(BaseRunner):
         self, 
         agent_config_path: str, 
         buffer_config_path: str, 
+        env_config_path: str,
         max_episode_length: int,
     ):
         super().__init__()
@@ -29,10 +30,18 @@ class WorkerRunner(BaseRunner):
         # Initialize runner parameters
         self.agent_config_path = agent_config_path
         self.buffer_config_path = buffer_config_path
+        self.env_config_path = env_config_path
         self.max_episode_length = max_episode_length
 
-        # AGENT Declaration
         self.agent = create_configurable(self.agent_config_path, NameToSourcePath.agent)
+        self.replay_buffer = create_configurable(self.buffer_config_path, NameToSourcePath.buffer)
+        self.env_wrapped = create_configurable(self.env_config_path, NameToSourcePath.environment)
+
+        # Initialize network for OpenAI SAC agent
+        self.agent.init_network(
+            obs_space=self.env_wrapped.env.observation_space,
+            action_space=self.env_wrapped.env.action_space,
+        )
 
     def run(self, env, agent_params, is_train=None, task=None):
         """Grab data for system that's needed, and send a buffer accordingly. Note: does a single 'episode'
@@ -54,9 +63,7 @@ class WorkerRunner(BaseRunner):
         state_encoded = torch.tensor(state_encoded)
 
         ep_ret = 0
-        self.replay_buffer = create_configurable(
-            self.buffer_config_path, NameToSourcePath.buffer
-        )
+        
         while not done:
             t += 1
             
@@ -69,9 +76,8 @@ class WorkerRunner(BaseRunner):
             else:
                 raise NotImplementedError
 
-            action_obj = self.agent.select_action(state_encoded)
-            next_state_encoded, reward, done, info = env.step(
-                action_obj.action)
+            action = self.agent.select_action(state_encoded)
+            next_state_encoded, reward, done, info = env.step(action)
             
             next_state_encoded = torch.tensor(next_state_encoded)
             state_encoded.to(DEVICE)
@@ -82,14 +88,14 @@ class WorkerRunner(BaseRunner):
             self.replay_buffer.store(
                 {
                     "obs": state_encoded,
-                    "act": action_obj,
+                    "act": action,
                     "rew": reward,
                     "next_obs": next_state_encoded,
                     "done": done,
                 }
             )
             if done or t == self.max_episode_length:
-                self.replay_buffer.finish_path(action_obj)
+                self.replay_buffer.finish_path(action)
 
             state_encoded = next_state_encoded
         

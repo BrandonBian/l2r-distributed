@@ -11,19 +11,20 @@ env/
 environment/
 docs/build/*
 .vscode
+wandb/
 
 # Newly created kubectl yaml files
-kubernetes/mcar-sequential.yaml
-kubernetes/mcar-dUpdate.yaml
-kubernetes/mcar-dCollect.yaml
+## Mountain Car
+kubernetes/mcar*.yaml
 
-kubernetes/walker-sequential.yaml
-kubernetes/walker-dUpdate.yaml
-kubernetes/walker-dCollect.yaml
+## Bipedal Walker
+kubernetes/walker*.yaml
 
-kubernetes/l2r-sequential.yaml
-kubernetes/l2r-dUpdate.yaml
-kubernetes/l2r-dCollect.yaml
+## Lunar Lander
+kubernetes/lander*.yaml
+
+## Learn To Race
+kubernetes/l2r*.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

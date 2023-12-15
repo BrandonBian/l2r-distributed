@@ -1,11 +1,13 @@
 import subprocess
 import yaml
+import random
+import string
 
 ############################
 # - Input Configurations - #
 ############################
-# Define the RL environment ('mcar', 'walker', 'l2r')
-RL_env = input("Select RL environment (mcar/walker/l2r): ").strip()
+# Define the RL environment
+RL_env = input("Select RL environment (l2r/mcar/walker/walker-openai/lander-openai): ").strip()
 
 # Define the training paradigm ('sequential', 'dCollect', 'dUpdate')
 training_paradigm = input("Select training paradigm (sequential/dCollect/dUpdate): ").strip()
@@ -19,7 +21,7 @@ if training_paradigm != "sequential":
 exp_name = input("Input WandB experiment name: ").strip()
 
 # Sanity check
-assert RL_env in ("mcar", "walker", "l2r")
+assert RL_env in ("mcar", "walker", "l2r", "walker-openai", "lander-openai")
 assert training_paradigm in ("sequential", "dCollect", "dUpdate")
 
 # Fetch the corresponding source file
@@ -42,7 +44,6 @@ print("----------")
 print(f"RL Environment = [{RL_env}] | Training Paradigm = [{training_paradigm}] | Number of Workers = [{num_workers}] | Experiment Name = [{exp_name}] ---")
 print("----------")
 
-
 ######################################
 # - Configure Template: Sequential - #
 ######################################
@@ -57,15 +58,14 @@ if training_paradigm == "sequential":
     
     # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
     if RL_env == "l2r":
-        command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-        command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
-        command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
-        command += "mamba activate l2r && git checkout sequential && "
+        # Initiate the arrival simulator first, then install environment
+        prepend = "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
+        command = prepend + command
     
     command += f"python -m scripts.main --env {RL_env} "
     command += "--wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a "
     command += f"--exp_name {exp_name}"
-    
+
     assert "TODO" not in str(command)
     data["spec"]["containers"][0]["command"][2] = command
 
@@ -74,6 +74,14 @@ if training_paradigm == "sequential":
 #######################################
 else:
     updated_yaml = []
+
+    # Special treatment for port name since it has 15 character length restriction
+    port_name = f"{RL_env}-{training_paradigm.lower()}"
+
+    if len(port_name) > 15:
+        original = port_name
+        port_name = port_name[:11] + '-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=3))
+        print(f"[Warning] Port name exceeded 15 characters, renaming: {original} -> {port_name}")
 
     for idx, section in enumerate(data):
         if idx == 0:
@@ -91,17 +99,19 @@ else:
             section["spec"]["template"]["metadata"]["labels"]["tier"] = worker_name
             section["spec"]["template"]["spec"]["containers"][0]["name"] = worker_name
 
+            # NOTE: for non-L2R (plain Gym environment) workers, do no allocate GPU
+            section["spec"]["template"]["spec"]["containers"][0]["resources"]["limits"]["nvidia.com/gpu"] = 0
+
             # Configure command
             command = section["spec"]["template"]["spec"]["containers"][0]["command"][2]
             
-            # NOTE: for l2r we need to start Arrival Simulator
+            # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
             if RL_env == "l2r":
-                command += "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
-                command += "sleep 13m && "  # Wait for the installations to complete and the simulator to start running
-                command += "source /root/anaconda3/bin/activate && conda activate initialization && source /root/.bashrc && cd /workspace/l2r-distributed && "
-                command += "mamba activate l2r && "
-            
-            command += f" python worker.py --env {RL_env} --paradigm {training_paradigm}"
+                # Initiate the arrival simulator first, then install environment
+                prepend = "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
+                command = prepend + command
+
+            command += f" python worker.py --env {RL_env} --paradigm {training_paradigm} --port {port_name}"
             
             section["spec"]["template"]["spec"]["containers"][0]["command"][2] = command
 
@@ -112,11 +122,11 @@ else:
 
             # Configure names
             learner_name = f"{RL_env}-{training_paradigm.lower()}-learner"
-            port_name = f"{RL_env}-{training_paradigm.lower()}"
 
             section["metadata"]["name"] = learner_name
             section["spec"]["containers"][0]["name"] = learner_name
             section["spec"]["containers"][0]["ports"][0]["name"] = port_name
+            section["spec"]["hostname"] = port_name
 
             # Configure command
             command = section["spec"]["containers"][0]["command"][2]
@@ -129,8 +139,8 @@ else:
             # Service for worker-learner communication #
             ############################################
             section["metadata"]["name"] = f"{RL_env}-{training_paradigm.lower()}-learner"
-            section["spec"]["ports"][0]["name"] = f"{RL_env}-{training_paradigm.lower()}"
-            section["spec"]["ports"][0]["targetPort"] = f"{RL_env}-{training_paradigm.lower()}"
+            section["spec"]["ports"][0]["name"] = port_name
+            section["spec"]["ports"][0]["targetPort"] = port_name
 
         assert "TODO" not in str(section)
         updated_yaml.append(section)

@@ -40,6 +40,7 @@ spec:
               chmod +x setup-mamba.sh &&
               source ./setup-mamba.sh &&
               mamba activate l2r &&
+              sleep 1m &&
               cd /workspace/l2r-distributed &&
 ---
 apiVersion: v1
@@ -49,7 +50,7 @@ metadata:
   labels:
     app.kubernetes.io/name: proxy
 spec:
-  hostname: learner-1
+  hostname: TODO
   nodeSelector:
     nodetype: phortx
   containers:

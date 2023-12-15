@@ -18,8 +18,16 @@ class GymEnv:
             env_name (str): Name of environement
         """
         self.env = gym.make(env_name)
+        
+        print("[Gym Init] Environment name:", env_name)
+        print("[Gym Init] Environment observation space:", self.env.observation_space.shape)
+        print("[Gym Init] Environment action space:", self.env.action_space.shape)
 
     def step(self, action):
+        # NOTE: it seems like OpenAI Gym environment step() must take a numpy action
+        if isinstance(action, torch.Tensor):
+            action = action.cpu().numpy()
+
         (obs_encoded_new, reward, done, info) = self.env.step(action)
         return torch.as_tensor(obs_encoded_new, device=DEVICE), reward, done, info
 
