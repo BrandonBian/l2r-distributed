@@ -20,8 +20,8 @@ class GymEnv:
         self.env = gym.make(env_name)
         
         print("[Gym Env Init] Environment name:", env_name)
-        print("[Gym Env Init] Environment observation space:", self.env.observation_space.shape)
-        print("[Gym Env Init] Environment action space:", self.env.action_space.shape)
+        print("[Gym Env Init] Environment observation space:", self.env.observation_space)
+        print("[Gym Env Init] Environment action space:", self.env.action_space)
 
     def step(self, action):
         # NOTE: it seems like OpenAI Gym environment step() must take a numpy action
