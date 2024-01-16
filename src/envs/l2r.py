@@ -54,8 +54,8 @@ class L2RSingleCamera:
         )
 
         # Hard-coded L2R space dimensions
-        self.env.observation_space = Box(33,)
-        self.env.action_space = Box(2,)
+        self.env.observation_space = Box(-np.inf, np.inf, (33,), np.float32)
+        self.env.action_space = Box(-1.0, 1.0, (2,), np.float32)
 
         print("[L2R Env Init] Environment observation space:", self.env.observation_space.shape)
         print("[L2R Env Init] Environment action space:", self.env.action_space.shape)
