@@ -5,7 +5,7 @@ import itertools
 from src.constants import DEVICE
 from src.config.yamlize import create_configurable, yamlize, NameToSourcePath
 from l2r import build_env
-
+from gym.spaces import Box
 
 @yamlize
 class L2RSingleCamera:
@@ -17,8 +17,7 @@ class L2RSingleCamera:
         Args:
             encoder (nn.Module, optional): Encoder object to encoder inputs. Defaults to None.
         """
-        self.encoder = create_configurable(
-            encoder_config_path, NameToSourcePath.encoder)
+        self.encoder = create_configurable(encoder_config_path, NameToSourcePath.encoder)
         self.encoder.to(DEVICE)
 
         self.env = build_env(
@@ -53,6 +52,13 @@ class L2RSingleCamera:
                 "min_accel": -1,
             },
         )
+
+        # Hard-coded L2R space dimensions
+        self.env.observation_space = Box(33,)
+        self.env.action_space = Box(2,)
+
+        print("[L2R Env Init] Environment observation space:", self.env.observation_space.shape)
+        print("[L2R Env Init] Environment action space:", self.env.action_space.shape)
 
     def _process_obs(self, obs: dict):
         """Process observation using encoder
@@ -94,6 +100,5 @@ class L2RSingleCamera:
         Returns:
             next_obs: Encoded next observation.
         """
-        obs = self.env.reset(
-            random_pos=False if options is None else options.get("random_pos", False))
+        obs = self.env.reset(random_pos=False if options is None else options.get("random_pos", False))
         return self._process_obs(obs)
