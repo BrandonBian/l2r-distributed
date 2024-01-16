@@ -4,9 +4,10 @@
 - Every configuration is using **SAC agent** by default (Non-SAC configuration is not tested)
 - For environments marked with "**OpenAI**", they are using implementation of SAC agents, buffers, and runners from [vanilla OpenAI SpinningUp repository](https://github.com/openai/spinningup/tree/master/spinup/algos/pytorch/sac). For environments not marked, they are using implementation from prior iterations of this project, and may contain latent issues or deprecations. 
 - **NOTE**: a table of all **OpenAI Gym Environments** can be found [HERE](https://github.com/openai/gym/wiki/Table-of-environments). Our implementation only supports environments with `BOX(x,)` for both observation and action spaces.
-  - Mountain Car: `MountainCarContinuous-v0`
-  - Bipedal Walker: `BipedalWalker-v2`
-  - Lunar Lander: `LunarLanderContinuous-v2`
+  - Mountain Car: `MountainCarContinuous-v0` (Observation Space = `Box([-1.2  -0.07], [0.6  0.07], (2,), float32)`, Action Space = `Box(-1.0, 1.0, (1,), float32)`)
+  - Bipedal Walker: `BipedalWalker-v2` (Observation Space = `Box(-inf, inf, (24,), float32)`, Action Space = `Box(-1.0, 1.0, (4,), float32)`)
+  - Lunar Lander: `LunarLanderContinuous-v2` (Observation Space = `Box(-inf, inf, (8,), float32)`, Action Space = `Box(-1.0, 1.0, (2,), float32)`)
+  - L2R (learn-to-race): Our own environment (Observation Space = `Box(-inf, inf, (33,), float32)`, Action Space = `Box(-1.0, 1.0, (2,), float32)`)
 - **NOTE**: &#10004; means convergence, &#10003; means non-convergence. If no checkmark, not currently implemented.
 
 
