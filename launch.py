@@ -131,6 +131,12 @@ else:
             # Configure command
             command = section["spec"]["containers"][0]["command"][2]
 
+            # NOTE: for L2R, we need to add commands to auto-launch Arrival simulator
+            if RL_env == "l2r":
+                # Initiate the arrival simulator first, then install environment
+                prepend = "cd /home/LinuxNoEditor/ && sudo -u ubuntu ./ArrivalSim.sh -OpenGL & "
+                command = prepend + command
+
             command += f" python server.py --env {RL_env} --paradigm {training_paradigm} --wandb_apikey 173e38ab5f2f2d96c260f57c989b4d068b64fb8a --exp_name {exp_name}"
 
             section["spec"]["containers"][0]["command"][2] = command
