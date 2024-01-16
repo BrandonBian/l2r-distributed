@@ -79,14 +79,11 @@ class ModelFreeRunner(BaseRunner):
             )
 
         # AGENT Declaration
-        self.agent = create_configurable(
-            agent_config_path, NameToSourcePath.agent)
+        self.agent = create_configurable(agent_config_path, NameToSourcePath.agent)
 
         # BUFFER Declaration
         if not self.resume_training:
-            self.replay_buffer = create_configurable(
-                buffer_config_path, NameToSourcePath.buffer
-            )
+            self.replay_buffer = create_configurable(buffer_config_path, NameToSourcePath.buffer)
             self.best_ret = 0
             self.last_saved_episode = 0
             self.best_eval_ret = 0
@@ -101,8 +98,8 @@ class ModelFreeRunner(BaseRunner):
             self.replay_buffer = running_vars["buffer"]
             self.best_eval_ret = running_vars["current_best_eval_ret"]
 
-        self.env_wrapped = create_configurable(
-            env_config_path, NameToSourcePath.environment)
+        # ENV Declaration
+        self.env_wrapped = create_configurable(env_config_path, NameToSourcePath.environment)
 
     def run(self, api_key: str, exp_name: str):
         """Train an agent, with our given parameters, on the environment in question.
