@@ -31,8 +31,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    print(f"Server Configured - '{args.env}'")
-    print(f"Training Paradigm Configured - '{args.paradigm}'")
+    print(f"[Config Init] Server Configured - '{args.env}'")
+    print(f"[Config Init] Training Paradigm Configured - '{args.paradigm}'")
 
     # NOTE: walker -> https://www.gymlibrary.dev/environments/box2d/bipedal_walker/
     # NOTE: mcar -> https://mgoulao.github.io/gym-docs/environments/classic_control/mountain_car_continuous/
