@@ -43,10 +43,10 @@ class AsnycWorker:
         self.learner_address = learner_address
         self.mean_reward = 0.0
         self.paradigm = paradigm
-        self.env = env
+        self.env_wrapped = env
         self.runner = runner
 
-        print("[AsyncLearningNode Init] Environment Action Space ==", self.env.action_space)
+        print("[AsyncLearningNode Init] Environment Action Space ==", self.env_wrapped.env.action_space)
 
     def work(self) -> None:
         counter = 0
@@ -149,7 +149,7 @@ class AsnycWorker:
     ) -> Tuple[ReplayBuffer, Any]:
         """Collect 1 episode of data in the environment"""
 
-        buffer, result = self.runner.run(self.env, policy_weights, is_train=is_train)
+        buffer, result = self.runner.run(self.env_wrapped, policy_weights, is_train=is_train)
 
         return buffer, result
     
@@ -157,7 +157,7 @@ class AsnycWorker:
             self, policy_weights: dict, task: Task
     ) -> Tuple[ReplayBuffer, Any]:
         """ Collect 1 episode of data (replay buffer OR reward) in the environment """
-        buffer, result = self.runner.run(self.env, policy_weights, task=task)
+        buffer, result = self.runner.run(self.env_wrapped, policy_weights, task=task)
         return buffer, result
 
     def train(self, policy_weights: dict, batches: list):
