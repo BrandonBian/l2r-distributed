@@ -1,0 +1,6 @@
+name: WorkerRunner
+config:
+  agent_config_path: "config_files/l2r/agent.yaml"
+  buffer_config_path: "config_files/l2r/buffer.yaml"
+  env_config_path: "config_files/l2r/env.yaml"
+  max_episode_length: 50000 # max_ep_len
